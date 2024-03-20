@@ -112,6 +112,6 @@ c      END IF
       COMMON /angles/ alpha, beta, gamma
       COMMON /side/ a, b, c
       COMMON /shared/ S, pi
-      minCos = cos(min(alpha, beta, gamma))
+      minCos = cos(min(alpha, beta, gamma) * pi / 180)
       END
 
