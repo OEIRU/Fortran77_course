@@ -1,29 +1,32 @@
       PROGRAM MAIN
+      ! Объявление общих блоков для обмена данными между подпрограммами.
       COMMON /angles/ alpha, beta, gamma
-      COMMON /side/ c
+      COMMON /side/ a, b, c
       COMMON /shared/ S, pi
 
-      INTEGER i5
       REAL minAngle, minCos
       pi = 3.14159265
       DO WHILE (i .NE. 5)
-      CALL menu()
-      CALL input(i)
-      SELECT CASE (i)
+      CALL menu()      ! Вызов подпрограммы для вывода меню
+      CALL input(i)    ! Вызов подпрограммы для вывода выбора пользователя
+      SELECT CASE (i)  ! Определение операций switch
+      
       CASE (1)
       CALL setData()
-      CALL calculateBeta()
-      IF (c.GT.0 .AND. alpha.LT.180 .AND. gamma.LT.180 .AND. 
-     * alpha+gamma.LT.180) THEN
+      CALL calculateGamma()
+      IF (a.GT.0 .AND. b.GT.0 .AND. alpha.LT.180) THEN
 c      IF (a.LT.b+c .AND. b.LT.a+c .AND. c.LT.a+b) THEN
       CALL calculateS()
       ELSE
       PRINT *, 'Данная фигура не может быть треугольником.'
       END IF
+
       CASE (2)
       CALL output('S = ', S)
+      
       CASE (3)
       CALL output('Минимальный угол = ', minAngle())
+      
       CASE (4)
       CALL output('Min cos = ', minCos())
       CASE ( : 0, 6 : )
@@ -52,7 +55,7 @@ c      IF (a.LT.b+c .AND. b.LT.a+c .AND. c.LT.a+b) THEN
 
       SUBROUTINE output(text, result)
       COMMON /angles/ alpha, beta, gamma
-      COMMON /side/ c
+      COMMON /side/ a, b, c
       COMMON /shared/ S, pi
       CHARACTER *(*) text
       REAL result
@@ -63,48 +66,52 @@ c      PRINT *, 'Данная фигура не может быть треугольником.'
 c      END IF
       END
 
-      SUBROUTINE setData()
+      SUBROUTINE setData() ! Ввод данных 
       COMMON /angles/ alpha, beta, gamma
-      COMMON /side/ c
+      COMMON /side/ a, b, c 
       COMMON /shared/ S, pi
       PRINT *, 'Введите данные:'
-      PRINT *, 'Сторона: '
-      READ *, c
-      PRINT *, 'Прилежащий угол: '
+      PRINT *, 'Сторона a: '
+      READ *, a
+      PRINT *, 'Сторона b: '
+      READ *, b
+      PRINT *, 'Угол между ними: '
       READ *, alpha
-      PRINT *, 'Противоположный угол: '
-      READ *, gamma 
       END
 
-      SUBROUTINE calculateBeta()
+      SUBROUTINE calculateGamma() ! Вычисление углов
       COMMON /angles/ alpha, beta, gamma
-      COMMON /side/ c
+      COMMON /side/ a, b, c 
       COMMON /shared/ S, pi
-      beta = 180 - alpha - gamma
-c      a = c*sin(alpha * pi / 180)/sin(gamma * pi / 180)
-c      b = c*sin(beta * pi / 180)/sin(gamma * pi / 180)
+      c = sqrt(a**2+b**2-2*a*b*cos(alpha * pi / 180))
+      beta = acos((b**2 + c**2 - a**2)/(2*b*c)) * 180 / pi  
+      gamma = 180 - alpha - beta 
+      PRINT *, 'Значение переменной a:', a 
+      PRINT *, 'Значение переменной b:', b 
+      PRINT *, 'Значение переменной с:', c 
+      PRINT *, 'Значение переменной alpha:', alpha
+      PRINT *, 'Значение переменной beta:', beta
+      PRINT *, 'Значение переменной gamma:', gamma
+      END
+ 
+      SUBROUTINE calculateS() ! Вычисление площади 
+      COMMON /angles/ alpha, beta, gamma
+      COMMON /side/ a, b, c 
+      COMMON /shared/ S, pi
+      S = 0.5 * a * b * sin(alpha * pi / 180)
       END
 
-      SUBROUTINE calculateS()
+      REAL FUNCTION minAngle() ! Поиск минимального угла
       COMMON /angles/ alpha, beta, gamma
-      COMMON /side/ c
+      COMMON /side/ a, b, c 
       COMMON /shared/ S, pi
-c      S=(c**2)*sin(alpha*pi/180)*sin(beta*pi/180)/(2*sin(gamma*pi/180))
-      S=((c**2)/2)*(1-(cos(alpha*pi/180))**2)*(1/(tan(gamma*pi/180))+
-     * 1/(tan(alpha*pi/180)))
+      minAngle = min(alpha, beta, gamma) 
       END
 
-      REAL FUNCTION minAngle()
+      REAL FUNCTION minCos() ! Поиск минимального косинуса
       COMMON /angles/ alpha, beta, gamma
-      COMMON /side/ c
+      COMMON /side/ a, b, c
       COMMON /shared/ S, pi
-      minAngle = min(alpha, beta, gamma)
-      END
-
-      REAL FUNCTION minCos()
-      COMMON /angles/ alpha, beta, gamma
-      COMMON /side/ c
-      COMMON /shared/ S, pi
-      minCos = cos(min(alpha, beta, gamma) * pi / 180)
+      minCos = cos(min(alpha, beta, gamma))
       END
 
