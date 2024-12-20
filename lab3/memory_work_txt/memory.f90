@@ -139,35 +139,38 @@ subroutine multiplying_classical(A, F, i, i1, i2)
     ! Главная диагональ
     do k = 1, i
         temp(k) = temp(k) + A(main_diag_start + k - 1) * F(k)
+        print *, "Main diag: temp(", k, ") += A(", main_diag_start + k - 1, ") * F(", k, ") = ", A(main_diag_start + k - 1), "*", F(k)
     end do
 
     ! Первая верхняя диагональ
     do k = 1, i - 1
-        if (k + 1 <= i) then
-            temp(k) = temp(k) + A(upper1_diag_start + k - 1) * F(k + 1)
-        end if
+        temp(k) = temp(k) + A(upper1_diag_start + k - 1) * F(k + 1)
+        print *, "Upper1 diag: temp(", k, ") += A(", upper1_diag_start + k - 1, ") * F(", k + 1, ") = ", A(upper1_diag_start + k - 1), "*", F(k + 1)
     end do
 
     ! Вторая верхняя диагональ
     do k = 1, i - i2
-        if (k + i2 <= i) then
-            temp(k) = temp(k) + A(upper2_diag_start + k - 1) * F(k + i2)
-        end if
+        temp(k) = temp(k) + A(upper2_diag_start + k - 1) * F(k + i2)
+        print *, "Upper2 diag: temp(", k, ") += A(", upper2_diag_start + k - 1, ") * F(", k + i2, ") = ", A(upper2_diag_start + k - 1), "*", F(k + i2)
     end do
 
     ! Первая нижняя диагональ
     do k = 2, i
-        if (k - 1 >= 1) then
-            temp(k) = temp(k) + A(lower1_diag_start + k - 2) * F(k - 1)
-        end if
+        temp(k) = temp(k) + A(lower1_diag_start + k - 2) * F(k - 1)
+        print *, "Lower1 diag: temp(", k, ") += A(", lower1_diag_start + k - 2, ") * F(", k - 1, ") = ", A(lower1_diag_start + k - 2), "*", F(k - 1)
     end do
 
     ! Вторая нижняя диагональ
     do k = i1 + 1, i
-        if (k - i1 >= 1) then
-            temp(k) = temp(k) + A(lower2_diag_start + k - i1 - 1) * F(k - i1)
-        end if
+        temp(k) = temp(k) + A(lower2_diag_start + k - i1 - 1) * F(k - i1)
+        print *, "Lower2 diag: temp(", k, ") += A(", lower2_diag_start + k - i1 - 1, ") * F(", k - i1, ") = ", A(lower2_diag_start + k - i1 - 1), "*", F(k - i1)
     end do
+
+    print *, "Debug: Finished matrix-vector multiplication"
+
+    ! Копирование временного вектора в F
+    F = temp
+end subroutine multiplying_classical
 
 
 ! Запись результата в файл
@@ -200,4 +203,3 @@ program memory
     call output(F, i)
 
 end program memory
-
