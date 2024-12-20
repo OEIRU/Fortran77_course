@@ -31,8 +31,6 @@ subroutine vvod(A, n)
         stop
     endif
 
-    print *, 'Matrix dimensions: i =', i, ', i1 =', i1, ', i2 =', i2
-
     ! Проверка корректности размеров
     if (i1 <= 1 .or. i2 <= i1 .or. i <= i2) then
         print *, 'Error: Invalid matrix dimensions: i =', i, ', i1 =', i1, ', i2 =', i2
@@ -45,7 +43,6 @@ subroutine vvod(A, n)
     endif
 
     ! Чтение главной диагонали
-    print *, 'Reading main diagonal...'
     read(10, '(A)', IOSTAT=io) line
     read(line, *) (A(k), k = 1, i)
     if (io /= 0) then
@@ -53,13 +50,7 @@ subroutine vvod(A, n)
         stop
     endif
 
-    print *, 'Main diagonal successfully read:'
-    do k = 1, i
-        print *, 'A(', k, ') = ', A(k)
-    end do
-
     ! Чтение первой верхней диагонали
-    print *, 'Reading first upper diagonal...'
     read(10, '(A)', IOSTAT=io) line
     read(line, *) (A(i + k), k = 1, i - 1)
     if (io /= 0) then
@@ -67,10 +58,7 @@ subroutine vvod(A, n)
         stop
     endif
 
-    print *, 'First upper diagonal successfully read.'
-
     ! Чтение второй верхней диагонали
-    print *, 'Reading second upper diagonal...'
     read(10, '(A)', IOSTAT=io) line
     read(line, *) (A(2 * i - 1 + k), k = 1, i - i2)
     if (io /= 0) then
@@ -78,10 +66,7 @@ subroutine vvod(A, n)
         stop
     endif
 
-    print *, 'Second upper diagonal successfully read.'
-
     ! Чтение первой нижней диагонали
-    print *, 'Reading first lower diagonal...'
     read(10, '(A)', IOSTAT=io) line
     read(line, *) (A(2 * i - 1 + (i - i2) + k), k = 1, i - 1)
     if (io /= 0) then
@@ -89,10 +74,7 @@ subroutine vvod(A, n)
         stop
     endif
 
-    print *, 'First lower diagonal successfully read.'
-
     ! Чтение второй нижней диагонали
-    print *, 'Reading second lower diagonal...'
     read(10, '(A)', IOSTAT=io) line
     read(line, *) (A(3 * i - 2 + (i - i2) + k), k = 1, i - i1)
     if (io /= 0) then
@@ -100,7 +82,6 @@ subroutine vvod(A, n)
         stop
     endif
 
-    print *, 'Second lower diagonal successfully read.'
     close(10)
 
     ! Открытие файла вектора
@@ -121,64 +102,73 @@ subroutine vvod(A, n)
         stop
     endif
 
-    print *, 'Vector size validated: m =', m
+    ! Чтение вектора
+    read(11, *, IOSTAT=io) (F(k), k = 1, i)
+    if (io /= 0) then
+        print *, 'Error: Failed to read vector elements'
+        stop
+    endif
+
     close(11)
 end subroutine vvod
 
 ! Умножение матрицы на вектор
-subroutine multiplying(A, F, i, i1, i2)
+subroutine multiplying_classical(A, F, i, i1, i2)
     implicit none
     real, dimension(:), intent(in) :: A
-    real, dimension(:), intent(out) :: F
+    real, dimension(:), intent(inout) :: F
     integer, intent(in) :: i, i1, i2
     integer :: k
 
     integer :: main_diag_start, upper1_diag_start, upper2_diag_start
     integer :: lower1_diag_start, lower2_diag_start
+    real :: temp(i)
 
     ! Индексы для диагоналей
     main_diag_start = 1
     upper1_diag_start = main_diag_start + i
     upper2_diag_start = upper1_diag_start + (i - 1)
     lower1_diag_start = upper2_diag_start + (i - i2)
-    lower2_diag_start = lower1_diag_start + (i - i1)
+    lower2_diag_start = lower1_diag_start + (i - 1)
 
-    ! Инициализация результирующего вектора
-    F = 0.0
+    ! Инициализация временного вектора
+    temp = 0.0
 
-    ! Вклад главной диагонали
+    print *, "Debug: Starting matrix-vector multiplication"
+
+    ! Главная диагональ
     do k = 1, i
-        F(k) = F(k) + A(main_diag_start + k - 1)
+        temp(k) = temp(k) + A(main_diag_start + k - 1) * F(k)
     end do
 
-    ! Вклад первой верхней диагонали
+    ! Первая верхняя диагональ
     do k = 1, i - 1
-        F(k) = F(k) + A(upper1_diag_start + k - 1)
-        F(k + 1) = F(k + 1) + A(upper1_diag_start + k - 1)
+        if (k + 1 <= i) then
+            temp(k) = temp(k) + A(upper1_diag_start + k - 1) * F(k + 1)
+        end if
     end do
 
-    ! Вклад второй верхней диагонали
+    ! Вторая верхняя диагональ
     do k = 1, i - i2
-        F(k) = F(k) + A(upper2_diag_start + k - 1)
         if (k + i2 <= i) then
-            F(k + i2) = F(k + i2) + A(upper2_diag_start + k - 1)
-        endif
+            temp(k) = temp(k) + A(upper2_diag_start + k - 1) * F(k + i2)
+        end if
     end do
 
-    ! Вклад первой нижней диагонали
-    do k = 1, i - 1
-        F(k) = F(k) + A(lower1_diag_start + k - 1)
-        F(k + 1) = F(k + 1) + A(lower1_diag_start + k - 1)
+    ! Первая нижняя диагональ
+    do k = 2, i
+        if (k - 1 >= 1) then
+            temp(k) = temp(k) + A(lower1_diag_start + k - 2) * F(k - 1)
+        end if
     end do
 
-    ! Вклад второй нижней диагонали
-    do k = 1, i - i1
-        F(k) = F(k) + A(lower2_diag_start + k - 1)
-        if (k + i1 <= i) then
-            F(k + i1) = F(k + i1) + A(lower2_diag_start + k - 1)
-        endif
+    ! Вторая нижняя диагональ
+    do k = i1 + 1, i
+        if (k - i1 >= 1) then
+            temp(k) = temp(k) + A(lower2_diag_start + k - i1 - 1) * F(k - i1)
+        end if
     end do
-end subroutine multiplying
+
 
 ! Запись результата в файл
 subroutine output(F, i)
@@ -206,7 +196,8 @@ program memory
     implicit none
 
     call vvod(A, n)
-    call multiplying(A, F, i, i1, i2)
+    call multiplying_classical(A, F, i, i1, i2)
     call output(F, i)
 
 end program memory
+
