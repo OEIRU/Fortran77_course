@@ -7,7 +7,6 @@ module memory_module
 
 contains
 
-! Чтение данных из файлов
 subroutine vvod(A, n)
     implicit none
     real, dimension(:), intent(out) :: A
@@ -16,14 +15,12 @@ subroutine vvod(A, n)
     integer :: k
     character(len=256) :: line
 
-    ! Открытие файла матрицы
     open(10, FILE='matrix.txt', STATUS='old', IOSTAT=io)
     if (io /= 0) then
         print *, 'Error: Cannot open matrix.txt'
         stop
     endif
 
-    ! Чтение размеров матрицы
     read(10, '(A)', IOSTAT=io) line
     read(line, *) i, i1, i2
     if (io /= 0) then
@@ -31,7 +28,6 @@ subroutine vvod(A, n)
         stop
     endif
 
-    ! Проверка корректности размеров
     if (i1 <= 1 .or. i2 <= i1 .or. i <= i2) then
         print *, 'Error: Invalid matrix dimensions: i =', i, ', i1 =', i1, ', i2 =', i2
         stop
@@ -42,41 +38,46 @@ subroutine vvod(A, n)
         stop
     endif
 
-    ! Чтение главной диагонали
+    ! Reading main diagonal
     read(10, '(A)', IOSTAT=io) line
     read(line, *) (A(k), k = 1, i)
+    print *, 'Main diagonal:', (A(k), k = 1, i)
     if (io /= 0) then
         print *, 'Error: Failed to read main diagonal'
         stop
     endif
 
-    ! Чтение первой верхней диагонали
+    ! Reading first upper diagonal
     read(10, '(A)', IOSTAT=io) line
     read(line, *) (A(i + k), k = 1, i - 1)
+    print *, 'First upper diagonal:', (A(i + k), k = 1, i - 1)
     if (io /= 0) then
         print *, 'Error: Failed to read first upper diagonal'
         stop
     endif
 
-    ! Чтение второй верхней диагонали
+    ! Reading second upper diagonal
     read(10, '(A)', IOSTAT=io) line
     read(line, *) (A(2 * i - 1 + k), k = 1, i - i2)
+    print *, 'Second upper diagonal:', (A(2 * i - 1 + k), k = 1, i - i2)
     if (io /= 0) then
         print *, 'Error: Failed to read second upper diagonal'
         stop
     endif
 
-    ! Чтение первой нижней диагонали
+    ! Reading first lower diagonal
     read(10, '(A)', IOSTAT=io) line
-    read(line, *) (A(2 * i - 1 + (i - i2) + k), k = 1, i - 1)
+    read(line, *) (A(3 * i - 2 + (i - i2) + k), k = 1, i - 1)
+    print *, 'First lower diagonal:', (A(3 * i - 2 + (i - i2) + k), k = 1, i - 1)
     if (io /= 0) then
         print *, 'Error: Failed to read first lower diagonal'
         stop
     endif
 
-    ! Чтение второй нижней диагонали
+    ! Reading second lower diagonal
     read(10, '(A)', IOSTAT=io) line
-    read(line, *) (A(3 * i - 2 + (i - i2) + k), k = 1, i - i1)
+    read(line, *) (A(4 * i - 3 + (i - i2) + k), k = 1, i - i1)
+    print *, 'Second lower diagonal:', (A(4 * i - 3 + (i - i2) + k), k = 1, i - i1)
     if (io /= 0) then
         print *, 'Error: Failed to read second lower diagonal'
         stop
@@ -84,7 +85,7 @@ subroutine vvod(A, n)
 
     close(10)
 
-    ! Открытие файла вектора
+    ! Reading vector F
     open(11, FILE='vector.txt', STATUS='old', IOSTAT=io)
     if (io /= 0) then
         print *, 'Error: Cannot open vector.txt'
@@ -102,8 +103,8 @@ subroutine vvod(A, n)
         stop
     endif
 
-    ! Чтение вектора
     read(11, *, IOSTAT=io) (F(k), k = 1, i)
+    print *, 'Vector F:', (F(k), k = 1, i)
     if (io /= 0) then
         print *, 'Error: Failed to read vector elements'
         stop
@@ -112,68 +113,58 @@ subroutine vvod(A, n)
     close(11)
 end subroutine vvod
 
-! Умножение матрицы на вектор
 subroutine multiplying_classical(A, F, i, i1, i2)
     implicit none
     real, dimension(:), intent(in) :: A
     real, dimension(:), intent(inout) :: F
     integer, intent(in) :: i, i1, i2
     integer :: k
+    real :: temp(n)  ! Temporary vector for storing result
 
-    integer :: main_diag_start, upper1_diag_start, upper2_diag_start
-    integer :: lower1_diag_start, lower2_diag_start
-    real :: temp(i)
-
-    ! Индексы для диагоналей
-    main_diag_start = 1
-    upper1_diag_start = main_diag_start + i
-    upper2_diag_start = upper1_diag_start + (i - 1)
-    lower1_diag_start = upper2_diag_start + (i - i2)
-    lower2_diag_start = lower1_diag_start + (i - 1)
-
-    ! Инициализация временного вектора
-    temp = 0.0
+    temp = 0.0  ! Initialize temp vector with zeros
 
     print *, "Debug: Starting matrix-vector multiplication"
 
-    ! Главная диагональ
+    ! Multiply main diagonal
     do k = 1, i
-        temp(k) = temp(k) + A(main_diag_start + k - 1) * F(k)
-        print *, "Main diag: temp(", k, ") += A(", main_diag_start + k - 1, ") * F(", k, ") = ", A(main_diag_start + k - 1), "*", F(k)
+        temp(k) = temp(k) + A(k) * F(k)
+        print *, "Main diag: temp(", k, ") += A(", k, ") * F(", k, ") = ", &
+                 A(k), "*", F(k)
     end do
 
-    ! Первая верхняя диагональ
+    ! Multiply first upper diagonal
     do k = 1, i - 1
-        temp(k) = temp(k) + A(upper1_diag_start + k - 1) * F(k + 1)
-        print *, "Upper1 diag: temp(", k, ") += A(", upper1_diag_start + k - 1, ") * F(", k + 1, ") = ", A(upper1_diag_start + k - 1), "*", F(k + 1)
+        temp(k + 1) = temp(k + 1) + A(i + k) * F(k)
+        print *, "Upper1 diag: temp(", k + 1, ") += A(", i + k, ") * F(", k, ") = ", &
+                 A(i + k), "*", F(k)
     end do
 
-    ! Вторая верхняя диагональ
+    ! Multiply second upper diagonal
     do k = 1, i - i2
-        temp(k) = temp(k) + A(upper2_diag_start + k - 1) * F(k + i2)
-        print *, "Upper2 diag: temp(", k, ") += A(", upper2_diag_start + k - 1, ") * F(", k + i2, ") = ", A(upper2_diag_start + k - 1), "*", F(k + i2)
+        temp(k + i2) = temp(k + i2) + A(2 * i - 1 + k) * F(k)
+        print *, "Upper2 diag: temp(", k + i2, ") += A(", 2 * i - 1 + k, ") * F(", k, ") = ", &
+                 A(2 * i - 1 + k), "*", F(k)
     end do
 
-    ! Первая нижняя диагональ
+    ! Multiply first lower diagonal
     do k = 2, i
-        temp(k) = temp(k) + A(lower1_diag_start + k - 2) * F(k - 1)
-        print *, "Lower1 diag: temp(", k, ") += A(", lower1_diag_start + k - 2, ") * F(", k - 1, ") = ", A(lower1_diag_start + k - 2), "*", F(k - 1)
+        temp(k) = temp(k) + A(3 * i - 2 + k - 1) * F(k - 1)
+        print *, "Lower1 diag: temp(", k, ") += A(", 3 * i - 2 + k - 1, ") * F(", k - 1, ") = ", &
+                 A(3 * i - 2 + k - 1), "*", F(k - 1)
     end do
 
-    ! Вторая нижняя диагональ
+    ! Multiply second lower diagonal
     do k = i1 + 1, i
-        temp(k) = temp(k) + A(lower2_diag_start + k - i1 - 1) * F(k - i1)
-        print *, "Lower2 diag: temp(", k, ") += A(", lower2_diag_start + k - i1 - 1, ") * F(", k - i1, ") = ", A(lower2_diag_start + k - i1 - 1), "*", F(k - i1)
+        temp(k) = temp(k) + A(4 * i - 3 + k - i1 - 1) * F(k - i1)
+        print *, "Lower2 diag: temp(", k, ") += A(", 4 * i - 3 + k - i1 - 1, ") * F(", k - i1, ") = ", &
+                 A(4 * i - 3 + k - i1 - 1), "*", F(k - i1)
     end do
 
     print *, "Debug: Finished matrix-vector multiplication"
 
-    ! Копирование временного вектора в F
-    F = temp
+    F(1:i) = temp(1:i)  ! Save result to F vector
 end subroutine multiplying_classical
 
-
-! Запись результата в файл
 subroutine output(F, i)
     implicit none
     real, dimension(:), intent(in) :: F
@@ -193,8 +184,7 @@ end subroutine output
 
 end module memory_module
 
-! Главная программа
-program memory
+program matrix_vector_debug
     use memory_module
     implicit none
 
@@ -202,4 +192,4 @@ program memory
     call multiplying_classical(A, F, i, i1, i2)
     call output(F, i)
 
-end program memory
+end program matrix_vector_debug
