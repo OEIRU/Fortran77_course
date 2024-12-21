@@ -1,7 +1,8 @@
 program convert_to_binary
     implicit none
     integer :: n, i1, i2, i, io
-    real, allocatable :: A(:,:), F(:)
+    real, allocatable :: main_diag(:), upper_diag_1(:), upper_diag_2(:)
+    real, allocatable :: lower_diag_1(:), lower_diag_2(:)
 
     ! Чтение текстового файла matrix.txt
     open(10, file='matrix.txt', status='old', iostat=io)
@@ -17,40 +18,41 @@ program convert_to_binary
         stop
     end if
 
-    allocate(A(5, n))
-    A = 0.0
+    ! Выделение памяти для диагоналей
+    allocate(main_diag(n))             ! Главная диагональ
+    allocate(upper_diag_1(n-1))       ! Первая верхняя диагональ
+    allocate(upper_diag_2(n-i2))      ! Вторая верхняя диагональ
+    allocate(lower_diag_1(n-1))       ! Первая нижняя диагональ
+    allocate(lower_diag_2(n-i1))      ! Вторая нижняя диагональ
 
     ! Чтение диагоналей матрицы
-    read(10, *, iostat=io) (A(1, i), i=1, n)    ! Главная диагональ
-    read(10, *, iostat=io) (A(2, i), i=1, n-1)  ! Первая верхняя диагональ
-    read(10, *, iostat=io) (A(3, i), i=1, n-i2) ! Вторая верхняя диагональ
-    read(10, *, iostat=io) (A(4, i), i=1, n-1)  ! Первая нижняя диагональ
-    read(10, *, iostat=io) (A(5, i), i=1, n-i1) ! Вторая нижняя диагональ
+    read(10, *, iostat=io) (main_diag(i), i=1, n)
+    read(10, *, iostat=io) (upper_diag_1(i), i=1, n-1)
+    read(10, *, iostat=io) (upper_diag_2(i), i=1, n-i2)
+    read(10, *, iostat=io) (lower_diag_1(i), i=1, n-1)
+    read(10, *, iostat=io) (lower_diag_2(i), i=1, n-i1)
     close(10)
 
-    ! Отладочный вывод для проверки заполненности массива A
-    print *, "Matrix A to be written to binary file:"
-    do i = 1, 5
-        if (i == 1) then
-            print *, A(i, 1:n)
-        else if (i == 2 .or. i == 4) then
-            print *, A(i, 1:n-1)
-        else if (i == 3) then
-            print *, A(i, 1:n-i2)
-        else if (i == 5) then
-            print *, A(i, 1:n-i1)
-        end if
-    end do
+    ! Отладочный вывод для проверки заполненности диагоналей
+    print *, "Main diagonal:", main_diag
+    print *, "First upper diagonal:", upper_diag_1
+    print *, "Second upper diagonal:", upper_diag_2
+    print *, "First lower diagonal:", lower_diag_1
+    print *, "Second lower diagonal:", lower_diag_2
 
-    ! Запись матрицы в бинарный файл
+    ! Запись данных в бинарный файл matrix.bin
     open(20, file='matrix.bin', status='replace', access='stream', form='unformatted', iostat=io)
     if (io /= 0) then
         print *, 'Error: Cannot open file matrix.bin for writing'
         stop
     end if
 
-    write(20) n, i1, i2       ! Записываем размеры
-    write(20) A               ! Записываем данные матрицы
+    write(20) n, i1, i2                 ! Записываем размеры
+    write(20) main_diag                 ! Записываем главную диагональ
+    write(20) upper_diag_1              ! Записываем первую верхнюю диагональ
+    write(20) upper_diag_2              ! Записываем вторую верхнюю диагональ
+    write(20) lower_diag_1              ! Записываем первую нижнюю диагональ
+    write(20) lower_diag_2              ! Записываем вторую нижнюю диагональ
     close(20)
 
     print *, "Matrix successfully written to matrix.bin"
