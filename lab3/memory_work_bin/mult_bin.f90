@@ -15,7 +15,6 @@ program matrix_vector_multiply_bin
     call write_vector_text('result.txt')    ! Запись результата в текстовый файл
 
     print *, 'Multiplication completed successfully.'
-    print *, 'Result vector: ', F(1:n)
 
 contains
 
@@ -70,20 +69,6 @@ contains
     end if
 
     close(10)
-
-    ! Отладочный вывод
-    print *, "Matrix A read from binary file:"
-    do i = 1, 5
-        if (i == 1) then
-            print *, "Main diagonal: ", A(i, 1:n)
-        else if (i == 2 .or. i == 4) then
-            print *, "Diagonal ", i, ": ", A(i, 1:n-1)
-        else if (i == 3) then
-            print *, "Diagonal ", i, ": ", A(i, 1:n-i2)
-        else if (i == 5) then
-            print *, "Diagonal ", i, ": ", A(i, 1:n-i1)
-        end if
-    end do
 end subroutine read_matrix_binary
 
 
@@ -115,11 +100,7 @@ end subroutine read_matrix_binary
 
     close(11)
 
-    ! Отладочный вывод
-    print *, "Vector F read from binary file (size = ", n, "):"
-    print *, F(1:n)
 end subroutine read_vector_binary
-
 
     ! Умножение матрицы на вектор
     subroutine multiply_matrix_vector()
@@ -134,7 +115,6 @@ end subroutine read_vector_binary
             if (i < n) result(i) = result(i) + A(2, i) * F(i+1)    ! Первая верхняя диагональ
             if (i <= n-i2) result(i) = result(i) + A(3, i) * F(i+i2)  ! Вторая верхняя диагональ
 
-            print *, "Result after ", i, "th iteration: ", result(i)
         end do
 
         F(1:n) = result(1:n)

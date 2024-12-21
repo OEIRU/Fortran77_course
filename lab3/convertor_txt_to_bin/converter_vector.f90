@@ -25,10 +25,6 @@ program convert_to_binary_vector
     end if
     close(11)
 
-    ! Отладочный вывод для проверки вектора F
-    print *, "Vector F to be written to binary file:"
-    print *, F(1:n)
-
     ! Запись вектора в бинарный файл
     open(21, file='vector.bin', status='replace', access='stream', form='unformatted', iostat=io)
     if (io /= 0) then

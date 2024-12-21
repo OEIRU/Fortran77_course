@@ -33,13 +33,6 @@ program convert_to_binary
     read(10, *, iostat=io) (lower_diag_2(i), i=1, n-i1)
     close(10)
 
-    ! Отладочный вывод для проверки заполненности диагоналей
-    print *, "Main diagonal:", main_diag
-    print *, "First upper diagonal:", upper_diag_1
-    print *, "Second upper diagonal:", upper_diag_2
-    print *, "First lower diagonal:", lower_diag_1
-    print *, "Second lower diagonal:", lower_diag_2
-
     ! Запись данных в бинарный файл matrix.bin
     open(20, file='matrix.bin', status='replace', access='stream', form='unformatted', iostat=io)
     if (io /= 0) then
