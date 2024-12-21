@@ -1,4 +1,4 @@
-module matrix_multiply
+module matrix_multiply_binary
     implicit none
     integer, parameter :: max_size = 1000000
     integer :: n, i1, i2
@@ -8,49 +8,22 @@ module matrix_multiply
 
 contains
 
-subroutine read_matrix(filename)
+subroutine read_matrix_binary(filename)
     character(len=*), intent(in) :: filename
     integer :: io, i
     
-    open(10, file=filename, access='direct', recl=4, iostat=io)
+    open(10, file=filename, status='old', access='stream', form='unformatted', iostat=io)
     if (io /= 0) then
         print *, 'Error: Cannot open file ', filename
         stop
     end if
 
-    read(10, rec=1, iostat=io) n
-    read(10, rec=2, iostat=io) i1
-    read(10, rec=3, iostat=io) i2
-    if (io /= 0) then
-        print *, 'Error: Failed to read dimensions'
-        stop
-    end if
-    
-    ! Чтение всех диагоналей
-    do i = 1, n
-        read(10, rec=3+i, iostat=io) A(1, i)  ! Главная диагональ
-    end do
-    do i = 1, n-1
-        read(10, rec=3+n+i, iostat=io) A(2, i)  ! Первая верхняя
-    end do
-    do i = 1, n-i2
-        read(10, rec=3+n+(n-1)+i, iostat=io) A(3, i)  ! Вторая верхняя
-    end do
-    do i = 1, n-1
-        read(10, rec=3+n+(n-1)+(n-i2)+i, iostat=io) A(4, i)  ! Первая нижняя
-    end do
-    do i = 1, n-i1
-        read(10, rec=3+n+(n-1)+(n-i2)+(n-1)+i, iostat=io) A(5, i)  ! Вторая нижняя
-    end do
-
-    if (io /= 0) then
-        print *, 'Error: Failed to read matrix data'
-        stop
-    end if
+    read(10) n, i1, i2
+    read(10) A
     close(10)
 
     ! Отладочный вывод
-    print *, "A after reading:"
+    print *, "A after reading from binary:"
     do i = 1, 5
         if (i == 1) then
             print *, A(i, 1:n)
@@ -62,35 +35,25 @@ subroutine read_matrix(filename)
             print *, A(i, 1:n-i1)
         end if
     end do
-end subroutine read_matrix
+end subroutine read_matrix_binary
 
-subroutine read_vector(filename)
+subroutine read_vector_binary(filename)
     character(len=*), intent(in) :: filename
     integer :: io, i
     
-    open(11, file=filename, access='direct', recl=4, iostat=io)
+    open(11, file=filename, status='old', access='stream', form='unformatted', iostat=io)
     if (io /= 0) then
         print *, 'Error: Cannot open file ', filename
         stop
     end if
 
-    read(11, rec=1, iostat=io) n
-    if (io /= 0) then
-        print *, 'Error: Failed to read vector size'
-        stop
-    end if
-
-    do i = 1, n
-        read(11, rec=1+i, iostat=io) F(i)
-    end do
-    if (io /= 0) then
-        print *, 'Error: Failed to read vector data'
-        stop
-    end if
+    read(11) n
+    read(11) F
     close(11)
 
-    print *, "F before multiplication:", F(1:n)
-end subroutine read_vector
+    print *, "F before multiplication from binary:", F(1:n)
+end subroutine read_vector_binary
+
 
 subroutine multiply_matrix_vector()
     integer :: i, j
@@ -127,14 +90,14 @@ end subroutine write_vector
 
 end module matrix_multiply
 
-program main
-    use matrix_multiply
+program main_binary
+    use matrix_multiply_binary
     
-    call read_matrix('matrix.bin')
-    call read_vector('vector.bin')
+    call read_matrix_binary('matrix.bin')
+    call read_vector_binary('vector.bin')
     call multiply_matrix_vector()
-    call write_vector('result.txt')
+    call write_vector('result.bin')
     
     print *, 'Multiplication completed successfully.'
     print *, 'Result vector: ', F(1:n)
-end program main
+end program main_binary
