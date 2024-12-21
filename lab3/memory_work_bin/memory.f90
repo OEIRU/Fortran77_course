@@ -1,103 +1,181 @@
-module matrix_multiply_binary
+program matrix_vector_multiply_bin
     implicit none
+
+    ! Константы и переменные
     integer, parameter :: max_size = 1000000
     integer :: n, i1, i2
-    real :: A(5, max_size)  ! Хранение диагоналей в двумерном массиве
+    real :: A(5, max_size)  ! Матрица, хранящаяся в виде 5 диагоналей
     real :: F(max_size), result(max_size)
-    common /razm/ n, i1, i2
+
+    ! Объявление подпрограмм
+    call read_matrix_binary('matrix.bin')   ! Чтение матрицы
+    call read_vector_binary('vector.bin')   ! Чтение вектора
+    call multiply_matrix_vector()           ! Умножение
+    call write_vector_binary('result.bin')  ! Запись результата в бинарный файл
+    call write_vector_text('result.txt')    ! Запись результата в текстовый файл
+
+    print *, 'Multiplication completed successfully.'
+    print *, 'Result vector: ', F(1:n)
 
 contains
 
-subroutine read_matrix_binary(filename)
+    ! Чтение бинарного файла матрицы
+    subroutine read_matrix_binary(filename)
     character(len=*), intent(in) :: filename
     integer :: io, i
-    
+
+    ! Открываем бинарный файл
     open(10, file=filename, status='old', access='stream', form='unformatted', iostat=io)
     if (io /= 0) then
         print *, 'Error: Cannot open file ', filename
         stop
     end if
 
-    read(10) n, i1, i2
-    read(10) A
+    ! Читаем размеры
+    read(10, iostat=io) n, i1, i2
+    if (io /= 0) then
+        print *, 'Error: Failed to read dimensions from binary file'
+        stop
+    end if
+
+    ! Читаем диагонали матрицы по отдельности
+    read(10, iostat=io) (A(1, i), i=1, n)        ! Главная диагональ
+    if (io /= 0) then
+        print *, 'Error: Failed to read main diagonal'
+        stop
+    end if
+
+    read(10, iostat=io) (A(2, i), i=1, n-1)      ! Первая верхняя диагональ
+    if (io /= 0) then
+        print *, 'Error: Failed to read first upper diagonal'
+        stop
+    end if
+
+    read(10, iostat=io) (A(3, i), i=1, n-i2)     ! Вторая верхняя диагональ
+    if (io /= 0) then
+        print *, 'Error: Failed to read second upper diagonal'
+        stop
+    end if
+
+    read(10, iostat=io) (A(4, i), i=1, n-1)      ! Первая нижняя диагональ
+    if (io /= 0) then
+        print *, 'Error: Failed to read first lower diagonal'
+        stop
+    end if
+
+    read(10, iostat=io) (A(5, i), i=1, n-i1)     ! Вторая нижняя диагональ
+    if (io /= 0) then
+        print *, 'Error: Failed to read second lower diagonal'
+        stop
+    end if
+
     close(10)
 
     ! Отладочный вывод
-    print *, "A after reading from binary:"
+    print *, "Matrix A read from binary file:"
     do i = 1, 5
         if (i == 1) then
-            print *, A(i, 1:n)
+            print *, "Main diagonal: ", A(i, 1:n)
         else if (i == 2 .or. i == 4) then
-            print *, A(i, 1:n-1)
+            print *, "Diagonal ", i, ": ", A(i, 1:n-1)
         else if (i == 3) then
-            print *, A(i, 1:n-i2)
+            print *, "Diagonal ", i, ": ", A(i, 1:n-i2)
         else if (i == 5) then
-            print *, A(i, 1:n-i1)
+            print *, "Diagonal ", i, ": ", A(i, 1:n-i1)
         end if
     end do
 end subroutine read_matrix_binary
 
-subroutine read_vector_binary(filename)
+
+    ! Чтение бинарного файла вектора
+   subroutine read_vector_binary(filename)
     character(len=*), intent(in) :: filename
     integer :: io, i
-    
+
+    ! Открываем бинарный файл
     open(11, file=filename, status='old', access='stream', form='unformatted', iostat=io)
     if (io /= 0) then
         print *, 'Error: Cannot open file ', filename
         stop
     end if
 
-    read(11) n
-    read(11) F
+    ! Читаем размер вектора
+    read(11, iostat=io) n
+    if (io /= 0) then
+        print *, 'Error: Failed to read vector size from binary file'
+        stop
+    end if
+
+    ! Читаем данные вектора
+    read(11, iostat=io) (F(i), i=1, n)
+    if (io /= 0) then
+        print *, 'Error: Failed to read vector data from binary file'
+        stop
+    end if
+
     close(11)
 
-    print *, "F before multiplication from binary:", F(1:n)
+    ! Отладочный вывод
+    print *, "Vector F read from binary file (size = ", n, "):"
+    print *, F(1:n)
 end subroutine read_vector_binary
 
 
-subroutine multiply_matrix_vector()
-    integer :: i, j
-    
-    do i = 1, n
-        result(i) = A(1, i) * F(i)
-        
-        if (i > 1) result(i) = result(i) + A(4, i-1) * F(i-1)  ! Первая нижняя диагональ
-        if (i > 2) result(i) = result(i) + A(5, i-2) * F(i-2)  ! Вторая нижняя диагональ
-        
-        if (i < n) result(i) = result(i) + A(2, i) * F(i+1)  ! Первая верхняя диагональ
-        if (i <= n-i2) result(i) = result(i) + A(3, i) * F(i+i2)  ! Вторая верхняя диагональ
+    ! Умножение матрицы на вектор
+    subroutine multiply_matrix_vector()
+        integer :: i
 
-        
-        print *, "Result after ", i, "th iteration: ", result(i)
-    end do
+        do i = 1, n
+            result(i) = A(1, i) * F(i)
 
-    F(1:n) = result(1:n)
-end subroutine multiply_matrix_vector
+            if (i > 1) result(i) = result(i) + A(4, i-1) * F(i-1)  ! Первая нижняя диагональ
+            if (i > 2) result(i) = result(i) + A(5, i-2) * F(i-2)  ! Вторая нижняя диагональ
 
-subroutine write_vector(filename)
-    character(len=*), intent(in) :: filename
-    integer :: io
-    
-    open(12, file=filename, status='replace', iostat=io)
-    if (io /= 0) then
-        print *, 'Error: Cannot write to file ', filename
-        stop
-    end if
-    
-    write(12, *) F(1:n)
-    close(12)
-end subroutine write_vector
+            if (i < n) result(i) = result(i) + A(2, i) * F(i+1)    ! Первая верхняя диагональ
+            if (i <= n-i2) result(i) = result(i) + A(3, i) * F(i+i2)  ! Вторая верхняя диагональ
 
-end module matrix_multiply
+            print *, "Result after ", i, "th iteration: ", result(i)
+        end do
 
-program main_binary
-    use matrix_multiply_binary
-    
-    call read_matrix_binary('matrix.bin')
-    call read_vector_binary('vector.bin')
-    call multiply_matrix_vector()
-    call write_vector('result.bin')
-    
-    print *, 'Multiplication completed successfully.'
-    print *, 'Result vector: ', F(1:n)
-end program main_binary
+        F(1:n) = result(1:n)
+    end subroutine multiply_matrix_vector
+
+    ! Запись результата в бинарный файл
+    subroutine write_vector_binary(filename)
+        character(len=*), intent(in) :: filename
+        integer :: io
+
+        open(12, file=filename, status='replace', access='stream', form='unformatted', iostat=io)
+        if (io /= 0) then
+            print *, 'Error: Cannot write to file ', filename
+            stop
+        end if
+
+        write(12) n
+        write(12) F(1:n)
+        close(12)
+
+        print *, "Result vector written to binary file."
+    end subroutine write_vector_binary
+
+    ! Запись результата в текстовый файл
+    subroutine write_vector_text(filename)
+        character(len=*), intent(in) :: filename
+        integer :: io, i
+
+        open(13, file=filename, status='replace', iostat=io)
+        if (io /= 0) then
+            print *, 'Error: Cannot write to file ', filename
+            stop
+        end if
+
+        write(13, *) "Result vector (size = ", n, "):"
+        do i = 1, n
+            write(13, *) F(i)
+        end do
+        close(13)
+
+        print *, "Result vector written to text file."
+    end subroutine write_vector_text
+
+end program matrix_vector_multiply_bin
