@@ -11,8 +11,8 @@ program matrix_vector_multiply_bin
     call read_matrix_binary('matrix.bin')   ! Чтение матрицы
     call read_vector_binary('vector.bin')   ! Чтение вектора
     call multiply_matrix_vector()           ! Умножение
-    call write_vector_binary('result.bin')  ! Запись результата в бинарный файл
-    call write_vector_text('result.txt')    ! Запись результата в текстовый файл
+    call write_vector_binary('result_2.bin')  ! Запись результата в бинарный файл
+    call write_vector_text('result_2.txt')    ! Запись результата в текстовый файл
 
     print *, 'Multiplication completed successfully.'
 

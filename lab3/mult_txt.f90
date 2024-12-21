@@ -101,7 +101,7 @@ program main
     call read_matrix('matrix.txt')
     call read_vector('vector.txt')
     call multiply_matrix_vector()
-    call write_vector('result.txt')
+    call write_vector('result_1.txt')
     
     print *, 'Multiplication completed successfully.'
 end program main
