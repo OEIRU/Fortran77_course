@@ -58,14 +58,14 @@
       INTEGER FUNCTION IS_INVISIBLE(FIRST, SECOND)   ! Проверка на невидимый шаг
           IMPLICIT NONE
           REAL FIRST, SECOND
-          CHARACTER*11 STR1, STR2 ! создание переменных
-          IS_INVISIBLE = 0        ! Тумблер
+          CHARACTER*11 STR1, STR2 
+          IS_INVISIBLE = 0        
           
           WRITE(STR1, '(E11.4)') FIRST
           WRITE(STR2, '(E11.4)') SECOND
           
           IF(STR1.EQ.STR2) THEN
-              IS_INVISIBLE = 1                       ! числа одинаковые - true
+              IS_INVISIBLE = 1                       
           ENDIF
           
           RETURN
@@ -83,14 +83,14 @@
             ARCCOS = 0.0
             RETURN
           ELSE
-            ARCCOS = ACOS(TO_RAD(X + Y))    !  Арко (x + y)
+            ARCCOS = ACOS(SUM)    !  Арк (x + y)
         ENDIF
           
       END
 
 
       
-      SUBROUTINE WRITE_ROW(X, M, REAL_M)       ! Логика таблицы (x_min, ?, real?)
+      SUBROUTINE WRITE_ROW(X, M, REAL_M)
           IMPLICIT NONE
           COMMON /INPUT/ X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP          
           REAL X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
@@ -98,41 +98,41 @@
           REAL ARCCOS
           INTEGER M, I, J, IS_INVISIBLE, REAL_M
           
-          WRITE(10, 11, ERR=101) '|'           ! Запись заголовка таблицы 
-          WRITE(10, 10, ERR=101) X, '|'        ! Запись переменной х в заголовок
-                                               ! Запись первого столбца 
-          Y = Y_MIN                            ! Создание переменной для обхода по Y
-          ARCCOS_RES = ARCCOS(X, Y)              ! подсчет первой итеации
+          WRITE(10, 11, ERR=101) '|'           ! Запись первого столбца  
+          WRITE(10, 10, ERR=101) X, '|'        
+                                                
+          Y = Y_MIN                            
+          ARCCOS_RES = ARCCOS(X, Y)            
           IF(ARCCOS_RES.NE.0.0) THEN
-              WRITE(10, 10, ERR=101) ARCCOS_RES, '|'    ! Если результат не 0 - вывод
+              WRITE(10, 10, ERR=101) ARCCOS_RES, '|'   
           ELSE
-              WRITE(10, 11, ERR=101) '        N/D|'    ! Результат 0 - N/D
+              WRITE(10, 11, ERR=101) '        N/D|'    
           ENDIF
           
           DO J=1, M-2, 1                       ! Запись решений с 2 до M-1 столбца 
               IF(Y + Y_STEP.GT.Y_MAX) THEN
-                  EXIT                         ! Y > Y_max - выход
+                  EXIT                         
               ENDIF  
               IF(IS_INVISIBLE(Y, Y + Y_STEP).EQ.1) THEN
-                  Y = Y + Y_STEP               ! Работа с невидимым шагом
+                  Y = Y + Y_STEP               
                   CYCLE                    
               ENDIF
-              Y = Y + Y_STEP                   ! Следующий Y 
+              Y = Y + Y_STEP                    
               IF(ABS(Y).LT.ABS(Y_STEP/2)) THEN
-                  Y = 0                        ! Если Y около нуля - занулить (??)
+                  Y = 0                       
               ENDIF
-              ARCCOS_RES = ARCCOS(X, Y)          ! Само вычисление
+              ARCCOS_RES = ARCCOS(X, Y)          
 
               IF(ARCCOS_RES.NE.0.0) THEN
-                  WRITE(10, 10, ERR=101) ARCCOS_RES, '|' ! Запись 
+                  WRITE(10, 10, ERR=101) ARCCOS_RES, '|'  
               ELSE
-                  WRITE(10, 11, ERR=101) '        N/D|' ! Вывод N/D
+                  WRITE(10, 11, ERR=101) '        N/D|' 
               ENDIF
           ENDDO
           
           ! Запись последнего столбца
           IF(IS_INVISIBLE(Y, Y_MAX).EQ.0) THEN   
-            ARCCOS_RES = ARCCOS(X, Y_MAX)      ! Если точно считается - считаем 
+            ARCCOS_RES = ARCCOS(X, Y_MAX)     
               IF(ARCCOS_RES.NE.0.0) THEN
                   WRITE(10, 10, ERR=101) ARCCOS_RES, '|'
               ELSE
@@ -140,12 +140,12 @@
               ENDIF
           ENDIF
               
-          WRITE(10, 12, ERR=101)               ! Переход на новую строку
+          WRITE(10, 12, ERR=101)               
           
           DO J=1, REAL_M, 1
-              WRITE(10, 11, ERR=101) '------------'     ! Разделитель между строками
+              WRITE(10, 11, ERR=101) '------------'     
           ENDDO
-          WRITE (10, 11, ERR=101) '-------------'       ! Финальный разделитель 
+          WRITE (10, 11, ERR=101) '-------------'       
           WRITE(10, 12, ERR=101)
           
           GOTO 109
@@ -190,20 +190,20 @@
           
           ! открываем таблицу
           OPEN(10, FILE='table.txt', ERR=100)
-                                                         ! Заголовок таблицы
-          WRITE(10, 11, ERR=101) '|        X/Y|'         ! Надпись X/Y
-          WRITE(10, 10, ERR=101) Y_MIN, '|'              ! Запись минимального Y 
-          DO I=1, M-2, 1                                 ! Запись столбца значений Y 
+                                                         
+          WRITE(10, 11, ERR=101) '|        X/Y|'         
+          WRITE(10, 10, ERR=101) Y_MIN, '|'               
+          DO I=1, M-2, 1                                  
               IF(IS_INVISIBLE(Y, Y + Y_STEP).EQ.1) THEN
-                  Y = Y + Y_STEP                         ! Невидимый шаг
-                  CYCLE                                  ! Выход из цикла
+                  Y = Y + Y_STEP                         
+                  CYCLE                                  
               ENDIF
               Y = Y + Y_STEP
               IF(ABS(Y).LT.ABS(Y_STEP/2)) THEN
                   Y = 0             
               ENDIF
               WRITE(10, 10, ERR=101) Y, '|'   
-              REAL_M = REAL_M + 1                        ! Т.к Y - строки         
+              REAL_M = REAL_M + 1                           
           ENDDO
           IF(IS_INVISIBLE(Y, Y_MAX).EQ.0) THEN
               REAL_M = REAL_M + 1
@@ -216,35 +216,34 @@
           WRITE (10, 11, ERR=101) '-------------'
           WRITE(10, 12, ERR=101)       
           
-          CALL WRITE_ROW(X_MIN, M, REAL_M)   ! После создания структуры строк
-                                             ! Создаем столбцы
+          CALL WRITE_ROW(X_MIN, M, REAL_M)  
           
           
-          !Write from 2 to N-1 row           ! Теперь заполняем строки
+          !Write from 2 to N-1 row           
           DO I=1, N-2, 1          
               IF(IS_INVISIBLE(X, X + X_STEP).EQ.0) THEN
-                  X = X + X_STEP             ! нет невидимого шаг
+                  X = X + X_STEP             
                   IF(ABS(X).LT.ABS(X_STEP/2)) THEN
-                      X = 0                  ! Погрешность
+                      X = 0                  
                   ENDIF    
-                  CALL WRITE_ROW(X, M, REAL_M) ! вызов заполнения строки x
+                  CALL WRITE_ROW(X, M, REAL_M) 
               ELSE
-                  X = X + X_STEP               ! Если есть, переходим на сл строку
+                  X = X + X_STEP              
               ENDIF
           ENDDO
           
           !Заполнение последней строки
           IF(IS_INVISIBLE(X, X_MAX).EQ.0) THEN
-              CALL WRITE_ROW(X_MAX, M, REAL_M) ! Если нет невидимого шага - пишем
+              CALL WRITE_ROW(X_MAX, M, REAL_M) 
           ENDIF
           
           CLOSE(10)
           
           GOTO 109
           
-10        FORMAT(E11.4, A, $)  ! Формат для вычислений
-11        FORMAT(A, $)         ! Запись строк
-12        FORMAT()             ! Переход на новую строку
+10        FORMAT(E11.4, A, $)  
+11        FORMAT(A, $)         
+12        FORMAT()             
    
 100       PAUSE 'Open table file error!'
           STOP   
@@ -255,7 +254,3 @@
           
 109       CONTINUE   
       END
-
-! Добавить проверку на диапозон суммы [-1, 1]
-! ANGLE * π / 180, но у меня ANGLE / 180 * 3.1415926
-! ACOS должен возращать так же число из диапозона [-1, 1]
