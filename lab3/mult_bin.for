@@ -1,8 +1,7 @@
       PROGRAM MATRIX_VECTOR_MULTIPLY_BIN
       INTEGER N, I1, I2, I, IO
-      PARAMETER (MAX_SIZE = 1000000)  ! Adjust MAX_SIZE as needed
-      REAL A(5, MAX_SIZE)  ! Matrix stored as 5 diagonals
-      REAL F(MAX_SIZE), RESULT(MAX_SIZE)
+      REAL A(5, 1000000)  ! Matrix stored as 5 diagonals
+      REAL F(1000000), RESULT(1000000)
 
       CALL READ_MATRIX_BINARY('matrix.bin')
       CALL READ_VECTOR_BINARY('vector.bin')
