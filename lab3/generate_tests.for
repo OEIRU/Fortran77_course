@@ -1,27 +1,23 @@
       PROGRAM GENERATE_TESTS
       INTEGER N, I1, I2
-      CHARACTER*20 MATRIX_TXT, VECTOR_TXT, MATRIX_BIN, VECTOR_BIN
+      CHARACTER*20 MATRIX_TXT, VECTOR_TXT
       CHARACTER*20 DATA_FILE
       PARAMETER (MAX_SIZE = 1000000)
       REAL A(5, MAX_SIZE), F(MAX_SIZE)
       INTEGER I, J
 
-      N = 10000  ! Пример размерности, можно изменить
-      I1 = 2   ! Пример значения I1, можно изменить
-      I2 = 2   ! Пример значения I2, можно изменить
+      N = 10000  
+      I1 = 2   
+      I2 = 2   
 
       MATRIX_TXT = 'matrix.txt'
       VECTOR_TXT = 'vector.txt'
-      MATRIX_BIN = 'matrix.bin'
-      VECTOR_BIN = 'vector.bin'
       DATA_FILE = 'data.txt'
 
       CALL WRITE_DATA(DATA_FILE, N, I1, I2)
       CALL GENERATE_DATA(N, I1, I2, A, F)
       CALL WRITE_TEXT_MATRIX(MATRIX_TXT, N, I1, I2, A)
       CALL WRITE_TEXT_VECTOR(VECTOR_TXT, N, F)
-      CALL WRITE_BINARY_MATRIX(MATRIX_BIN, N, I1, I2, A)
-      CALL WRITE_BINARY_VECTOR(VECTOR_BIN, N, F)
 
       END
 
@@ -89,30 +85,4 @@
       OPEN(16, FILE=FILENAME, STATUS='UNKNOWN')
       WRITE(16, *) (F(I), I=1, N)
       CLOSE(16)
-      END
-
-      SUBROUTINE WRITE_BINARY_MATRIX(FILENAME, N, I1, I2, A)
-      CHARACTER*20 FILENAME
-      INTEGER N, I1, I2, I
-      REAL A(5, *)
-
-      OPEN(13, FILE=FILENAME, STATUS='UNKNOWN', 
-     & FORM='UNFORMATTED', ACCESS='SEQUENTIAL')
-      WRITE(13) (A(1, I), I=1, N-I1)  ! Верхняя диагональ
-      WRITE(13) (A(2, I), I=1, N-1)   ! Над главной диагональю
-      WRITE(13) (A(3, I), I=1, N)     ! Главная диагональ
-      WRITE(13) (A(4, I), I=1, N-1)   ! Под главной диагональю
-      WRITE(13) (A(5, I), I=1, N-I2)  ! Нижняя диагональ
-      CLOSE(13)
-      END
-
-      SUBROUTINE WRITE_BINARY_VECTOR(FILENAME, N, F)
-      CHARACTER*20 FILENAME
-      INTEGER N, I
-      REAL F(*)
-
-      OPEN(14, FILE=FILENAME, STATUS='UNKNOWN', 
-     & FORM='UNFORMATTED', ACCESS='SEQUENTIAL')
-      WRITE(14) (F(I), I=1, N)
-      CLOSE(14)
       END

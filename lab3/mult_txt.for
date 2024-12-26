@@ -35,16 +35,11 @@
       OPEN(11, FILE=FILENAME, STATUS='OLD')
 
       READ(11, *) (A(1, I), I=1, N-I1)  ! Верхняя диагональ
-      WRITE(*, *) 'Read upper diagonal:', (A(1, I), I=1, N-I1)
       READ(11, *) (A(2, I), I=1, N-1)   ! Над главной диагональю
-      WRITE(*, *) 'Read super-diagonal:', (A(2, I), I=1, N-1)
       READ(11, *) (A(3, I), I=1, N)     ! Главная диагональ
-      WRITE(*, *) 'Read main diagonal:', (A(3, I), I=1, N)
       READ(11, *) (A(4, I), I=1, N-1)   ! Под главной диагональю
-      WRITE(*, *) 'Read sub-diagonal:', (A(4, I), I=1, N-1)
       READ(11, *) (A(5, I), I=1, N-I2)  ! Нижняя диагональ
-      WRITE(*, *) 'Read lower diagonal:', (A(5, I), I=1, N-I2)
-
+      
       CLOSE(11)
       WRITE(*, *) 'Reading matrix from file:', FILENAME
       RETURN
