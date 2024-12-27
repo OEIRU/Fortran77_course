@@ -95,5 +95,5 @@
       REAL FUNCTION fun(x)
       IMPLICIT NONE
       REAL x
-      fun = 10000.0 * SIN(7.0 * x)
+      fun = 1000.0 * SIN(5.0 * x)
       END
