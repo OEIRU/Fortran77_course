@@ -1,99 +1,95 @@
-      PROGRAM main
-      IMPLICIT NONE
-      REAL h, a, b
-      INTEGER N, max, i
-      COMMON /gridparam/ h, a, b, N
-      REAL grid(100000000)
+PROGRAM LAB4
+    REAL A, B, INTEGRAL_TRAPEZE, INTEGRAL_GAUSS
+    INTEGER N
+    PARAMETER (NMAX = 1000)  ! Максимальное количество узлов сетки
+    REAL GRID(NMAX)          ! Одномерный массив для сетки
+    EXTERNAL FUN             ! Интегрируемая функция
 
-      PRINT *, '1) trapezia'
-      PRINT *, '3) gauss-4'
-      PRINT *, '4) vihod'
-      
-      READ *, i
-      IF (i .EQ. 4) GOTO 100
+    ! Ввод данных с клавиатуры
+    PRINT *, 'Enter lower limit (A):'
+    READ *, A
+    PRINT *, 'Enter upper limit (B):'
+    READ *, B
+    PRINT *, 'Enter number of grid points (N):'
+    READ *, N
 
-      PRINT *, 'Enter segment and [a,b]'
-      READ *, max, a, b
+    ! Проверка на корректность введенных данных
+    IF (N .GT. NMAX) THEN
+        PRINT *, 'Error: N exceeds maximum allowed value (', NMAX, ')'
+        STOP
+    END IF
+    IF (A .GE. B) THEN
+        PRINT *, 'Error: A must be less than B'
+        STOP
+    END IF
 
-      N = 2
-      GOTO (10, 30) i
-   10 CALL trapeze(grid, max)
-      GOTO 100
-   30 CALL gauss4(grid, max)
-      GOTO 100
+    ! Построение сетки
+    CALL BUILD_GRID(A, B, N, GRID)
 
-  100 END
+    ! Вычисление интеграла методом трапеций
+    CALL TRAPEZE_METHOD(GRID, N, INTEGRAL_TRAPEZE)
+    PRINT *, 'Integral (Trapeze): ', INTEGRAL_TRAPEZE
 
-      SUBROUTINE Gridmake(grid)
-      IMPLICIT NONE
-      REAL h, a, b
-      INTEGER N, i
-      COMMON /gridparam/ h, a, b, N
-      REAL grid(N)
+    ! Вычисление интеграла методом Гаусса-4
+    CALL GAUSS4_METHOD(GRID, N, INTEGRAL_GAUSS)
+    PRINT *, 'Integral (Gauss-4): ', INTEGRAL_GAUSS
 
-      h = (b - a) / (N - 1)
-      grid(1) = a
-      DO i = 2, N
-          grid(i) = a + h * (i - 1)
-      END DO
-      END
+    END
 
-      SUBROUTINE trapeze(grid, max)
-      IMPLICIT NONE
-      REAL h, a, b
-      INTEGER N, max, i
-      COMMON /gridparam/ h, a, b, N
-      REAL grid(N)
-      REAL ans, fun
-      EXTERNAL fun
+    ! Интегрируемая функция
+    REAL FUNCTION FUN(X)
+    REAL X
+    FUN = X**2 + SIN(X)  ! Пример функции: x^2 + sin(x)
+    RETURN
+    END
 
-      DO WHILE (N .LE. max + 1)
-          CALL Gridmake(grid)
-          ans = h * (fun(grid(1)) + fun(grid(N))) / 2.0
-          DO i = 2, N - 1
-              ans = ans + h * fun(grid(i))
-          END DO
-          PRINT *, 'Trapezoidal rule result for N =', N, ':', ans
-          N = 2 * N - 1
-      END DO
-      END
+    ! Подпрограмма для построения равномерной сетки
+    SUBROUTINE BUILD_GRID(A, B, N, GRID)
+    REAL A, B, GRID(N)
+    INTEGER N, I
+    REAL H
+    H = (B - A) / (N - 1)
+    DO I = 1, N
+        GRID(I) = A + (I - 1) * H
+    END DO
+    RETURN
+    END
 
-      SUBROUTINE gauss4(grid, max)
-      IMPLICIT NONE
-      REAL h, a, b
-      INTEGER N, max, i
-      COMMON /gridparam/ h, a, b, N
-      REAL grid(N)
-      REAL ans, x1, x2, x3, x4, w1, w2, w3, w4, mid, fun
-      EXTERNAL fun
+    ! Подпрограмма для метода трапеций
+    SUBROUTINE TRAPEZE_METHOD(GRID, N, INTEGRAL)
+    REAL GRID(N), INTEGRAL
+    INTEGER N, I
+    REAL H, SUM
+    H = GRID(2) - GRID(1)
+    SUM = 0.0
+    DO I = 2, N - 1
+        SUM = SUM + FUN(GRID(I))
+    END DO
+    INTEGRAL = H * (0.5 * (FUN(GRID(1)) + FUN(GRID(N))) + SUM)
+    RETURN
+    END
 
-      w1 = 0.3478548451
-      w2 = 0.6521451549
-      w3 = 0.6521451549
-      w4 = 0.3478548451
-      x1 = -0.8611363116
-      x2 = -0.3399810436
-      x3 = 0.3399810436
-      x4 = 0.8611363116
-
-      DO WHILE (N .LE. max + 1)
-          CALL Gridmake(grid)
-          ans = 0.0
-          DO i = 1, N - 1
-              h = (grid(i + 1) - grid(i)) / 2.0
-              mid = (grid(i + 1) + grid(i)) / 2.0
-              ans = ans + h * (w1 * fun(mid + h * x1) + 
-     &                         w2 * fun(mid + h * x2) +
-     &                         w3 * fun(mid + h * x3) + 
-     &                         w4 * fun(mid + h * x4))
-          END DO
-          PRINT *, 'Gauss-4 rule result for N =', N, ':', ans
-          N = 2 * N - 1
-      END DO
-      END
-
-      REAL FUNCTION fun(x)
-      IMPLICIT NONE
-      REAL x
-      fun = 1000.0 * SIN(5.0 * x)
-      END
+    ! Подпрограмма для метода Гаусса-4
+    SUBROUTINE GAUSS4_METHOD(GRID, N, INTEGRAL)
+    REAL GRID(N), INTEGRAL
+    INTEGER N, I
+    REAL H, X1, X2, X3, X4, W1, W2, W3, W4
+    PARAMETER (W1 = 0.3478548451, W2 = 0.6521451549,
+   &           W3 = 0.6521451549, W4 = 0.3478548451)
+    PARAMETER (X1 = -0.8611363116, X2 = -0.3399810436,
+   &           X3 = 0.3399810436, X4 = 0.8611363116)
+    H = GRID(2) - GRID(1)
+    INTEGRAL = 0.0
+    DO I = 1, N - 1
+        INTEGRAL = INTEGRAL + H / 2.0 * (
+   &        W1 * FUN((GRID(I+1) - GRID(I)) / 2.0 * X1 +
+   &                 (GRID(I+1) + GRID(I)) / 2.0) +
+   &        W2 * FUN((GRID(I+1) - GRID(I)) / 2.0 * X2 +
+   &                 (GRID(I+1) + GRID(I)) / 2.0) +
+   &        W3 * FUN((GRID(I+1) - GRID(I)) / 2.0 * X3 +
+   &                 (GRID(I+1) + GRID(I)) / 2.0) +
+   &        W4 * FUN((GRID(I+1) - GRID(I)) / 2.0 * X4 +
+   &                 (GRID(I+1) + GRID(I)) / 2.0))
+    END DO
+    RETURN
+    END
