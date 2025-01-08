@@ -9,12 +9,6 @@
       RESULT_FILE = 'result.txt'
       
       CALL READ_DATA(DATA_FILE, N, I1, I2)
-      
-      IF (I1 .LT. 0 .OR. I1 .GE. N .OR. I2 .LT. 0 .OR. I2 .GE. N) THEN
-         WRITE(*, *) 'Invalid I1 or I2 values.'
-         STOP
-      END IF
-      
       CALL READ_MATRIX(MATRIX_FILE, N, I1, I2, mem(1))          ! Матрица A
       CALL READ_VECTOR(VECTOR_FILE, N, mem(5*N + 1))            ! Вектор F
       CALL MULTIPLY_MATRIX_VECTOR(N, I1, I2, mem(1), mem(5*N + 1), 
@@ -44,23 +38,20 @@
       
       OPEN(11, FILE=FILENAME, STATUS='OLD')
       
-      IF (I1 .GT. 0 .AND. N - I1 .GT. 0) THEN
-         READ(11, *) (A(1, I), I=1, N-I1)  ! Верхняя диагональ
-      END IF
+      ! Чтение верхней диагонали (длина N - I1)
+      READ(11, *) (A(1, I), I=1, N-I1)
       
-      IF (N - 1 .GT. 0) THEN
-         READ(11, *) (A(2, I), I=1, N-1)   ! Над главной диагональю
-      END IF
+      ! Чтение диагонали над главной (длина N - 1)
+      READ(11, *) (A(2, I), I=1, N-1)
       
-      READ(11, *) (A(3, I), I=1, N)        ! Главная диагональ
+      ! Чтение главной диагонали (длина N)
+      READ(11, *) (A(3, I), I=1, N)
       
-      IF (N - 1 .GT. 0) THEN
-         READ(11, *) (A(4, I), I=1, N-1)   ! Под главной диагональю
-      END IF
+      ! Чтение диагонали под главной (длина N - 1)
+      READ(11, *) (A(4, I), I=1, N-1)
       
-      IF (I2 .GT. 0 .AND. N - I2 .GT. 0) THEN
-         READ(11, *) (A(5, I), I=1, N-I2)  ! Нижняя диагональ
-      END IF
+      ! Чтение нижней диагонали (длина N - I2)
+      READ(11, *) (A(5, I), I=1, N-I2)
       
       CLOSE(11)
       WRITE(*, *) 'Reading matrix from file:', FILENAME
@@ -83,23 +74,33 @@
       
       SUBROUTINE MULTIPLY_MATRIX_VECTOR(N, I1, I2, A, F, RESULT)
       INTEGER N, I1, I2, I
-      REAL A(5, N), F(N), RESULT(N)  ! RESULT хранится в последних N элементах mem
+      REAL A(5, N), F(N), RESULT(N)
       
-      DO 100 I = 1, N
-         RESULT(I) = A(3, I) * F(I)  ! Главная диагональ
-         IF (I .GT. 1) THEN
-            RESULT(I) = RESULT(I) + A(2, I-1) * F(I-1)  ! Над главной
-         END IF
-         IF (I1 .GT. 0 .AND. I .GT. I1) THEN
-            RESULT(I) = RESULT(I) + A(1, I-I1) * F(I-I1)  ! Верхняя
-         END IF
-         IF (I .LT. N) THEN
-            RESULT(I) = RESULT(I) + A(4, I) * F(I+1)  ! Под главной
-         END IF
-         IF (I2 .GT. 0 .AND. I .LE. N - I2) THEN
-            RESULT(I) = RESULT(I) + A(5, I) * F(I+I2)  ! Нижняя
-         END IF
-100   CONTINUE
+      ! Инициализация результата и умножение на главную диагональ
+      DO 10 I = 1, N
+         RESULT(I) = A(3, I) * F(I)
+   10 CONTINUE
+      
+      ! Диагональ над главной
+      DO 20 I = 2, N
+         RESULT(I) = RESULT(I) + A(2, I-1) * F(I-1)
+   20 CONTINUE
+      
+      ! Верхняя диагональ
+      DO 30 I = I1 + 1, N
+         RESULT(I) = RESULT(I) + A(1, I-I1) * F(I-I1)
+   30 CONTINUE
+      
+      ! Диагональ под главной
+      DO 40 I = 1, N - 1
+         RESULT(I) = RESULT(I) + A(4, I) * F(I+1)
+   40 CONTINUE
+      
+      ! Нижняя диагональ
+      DO 50 I = 1, N - I2
+         RESULT(I) = RESULT(I) + A(5, I) * F(I+I2)
+   50 CONTINUE
+      
       WRITE(*, *) 'Multiplying matrix and vector'
       RETURN
       END

@@ -1,25 +1,18 @@
       PROGRAM MATRIX_MULTIPLY
+      IMPLICIT NONE
       INTEGER N, I1, I2
       REAL mem(1000000)  ! Общий массив для всех данных
-      CHARACTER*20 DATA_FILE, MATRIX_BIN, VECTOR_BIN, RESULT_FILE
+      CHARACTER*20 DATA_FILE, MATRIX_FILE, VECTOR_FILE, RESULT_FILE
       DATA_FILE = 'data.txt'
-      MATRIX_BIN = 'matrix.bin'
-      VECTOR_BIN = 'vector.bin'
-      RESULT_FILE = 'result.txt'
+      MATRIX_FILE = 'matrix.bin'
+      VECTOR_FILE = 'vector.bin'
+      RESULT_FILE = 'result.txt'  ! Изменено на текстовый файл
       
       CALL READ_DATA(DATA_FILE, N, I1, I2)
-      
-      IF (N .LE. 0 .OR. I1 .LT. 0 .OR. I1 .GE. N .OR. 
-     *    I2 .LT. 0 .OR. I2 .GE. N) THEN
-         WRITE(*, *) 'Invalid values for N, I1, or I2.'
-         STOP
-      END IF
-      
-      ! Используем mem для хранения матрицы A, вектора F и результата
-      CALL READ_BINARY_MATRIX(MATRIX_BIN, N, I1, I2, mem(1))          ! Матрица A
-      CALL READ_BINARY_VECTOR(VECTOR_BIN, N, mem(5*N + 1))            ! Вектор F
+      CALL READ_MATRIX(MATRIX_FILE, N, I1, I2, mem(1))          ! Матрица A
+      CALL READ_VECTOR(VECTOR_FILE, N, mem(5*N + 1))            ! Вектор F
       CALL MULTIPLY_MATRIX_VECTOR(N, I1, I2, mem(1), mem(5*N + 1), 
-     *                            mem(5*N + N + 1))                   ! Результат
+     *                            mem(5*N + N + 1))             ! Результат
       CALL WRITE_VECTOR(RESULT_FILE, N, mem(5*N + N + 1))
       
       END
@@ -27,18 +20,10 @@
       
       SUBROUTINE READ_DATA(FILENAME, N, I1, I2)
       CHARACTER*20 FILENAME
-      INTEGER N, I1, I2, IO_ERR
+      INTEGER N, I1, I2
       
-      OPEN(10, FILE=FILENAME, STATUS='OLD', IOSTAT=IO_ERR)
-      IF (IO_ERR .NE. 0) THEN
-         WRITE(*, *) 'Error opening file:', FILENAME
-         STOP
-      END IF
-      READ(10, *, IOSTAT=IO_ERR) N, I1, I2
-      IF (IO_ERR .NE. 0) THEN
-         WRITE(*, *) 'Error reading data from file:', FILENAME
-         STOP
-      END IF
+      OPEN(10, FILE=FILENAME, STATUS='OLD')
+      READ(10, *) N, I1, I2
       CLOSE(10)
       WRITE(*, *) 'Reading data from file:', FILENAME
       WRITE(*, *) 'N =', N, 'I1 =', I1, 'I2 =', I2
@@ -46,138 +31,91 @@
       END
       
       
-      SUBROUTINE READ_BINARY_MATRIX(FILENAME, N, I1, I2, A)
+      SUBROUTINE READ_MATRIX(FILENAME, N, I1, I2, A)
       CHARACTER*20 FILENAME
-      INTEGER N, I1, I2, I, IO_ERR
+      INTEGER N, I1, I2, I
       REAL A(5, N)  ! Матрица A хранится в первых 5*N элементах mem
       
-      OPEN(11, FILE=FILENAME, STATUS='OLD', ACCESS='DIRECT',
-     *     RECL=4, IOSTAT=IO_ERR)
-      IF (IO_ERR .NE. 0) THEN
-         WRITE(*, *) 'Error opening matrix file:', FILENAME
-         STOP
-      END IF
+      OPEN(11, FILE=FILENAME, STATUS='OLD', ACCESS='STREAM')
       
-      IF (I1 .GT. 0) THEN
-         DO 100 I = 1, N-I1
-            READ(11, REC=I, IOSTAT=IO_ERR) A(1, I)
-            IF (IO_ERR .NE. 0) THEN
-               WRITE(*, *) 'Error reading upper diagonal.'
-               STOP
-            END IF
- 100     CONTINUE
-      END IF
+      ! Чтение верхней диагонали (длина N - I1)
+      READ(11) (A(1, I), I=1, N-I1)
       
-      IF (N-1 .GT. 0) THEN
-         DO 200 I = 1, N-1
-            READ(11, REC=N-I1+I, IOSTAT=IO_ERR) A(2, I)
-            IF (IO_ERR .NE. 0) THEN
-               WRITE(*, *) 'Error reading above main diagonal.'
-               STOP
-            END IF
- 200     CONTINUE
-      END IF
+      ! Чтение диагонали над главной (длина N - 1)
+      READ(11) (A(2, I), I=1, N-1)
       
-      DO 300 I = 1, N
-         READ(11, REC=2*N-I1+I, IOSTAT=IO_ERR) A(3, I)
-         IF (IO_ERR .NE. 0) THEN
-            WRITE(*, *) 'Error reading main diagonal.'
-            STOP
-         END IF
- 300  CONTINUE
+      ! Чтение главной диагонали (длина N)
+      READ(11) (A(3, I), I=1, N)
       
-      IF (N-1 .GT. 0) THEN
-         DO 400 I = 1, N-1
-            READ(11, REC=3*N-I1+I, IOSTAT=IO_ERR) A(4, I)
-            IF (IO_ERR .NE. 0) THEN
-               WRITE(*, *) 'Error reading below main diagonal.'
-               STOP
-            END IF
- 400     CONTINUE
-      END IF
+      ! Чтение диагонали под главной (длина N - 1)
+      READ(11) (A(4, I), I=1, N-1)
       
-      IF (I2 .GT. 0) THEN
-         DO 500 I = 1, N-I2
-            READ(11, REC=4*N-I1+I, IOSTAT=IO_ERR) A(5, I)
-            IF (IO_ERR .NE. 0) THEN
-               WRITE(*, *) 'Error reading lower diagonal.'
-               STOP
-            END IF
- 500     CONTINUE
-      END IF
+      ! Чтение нижней диагонали (длина N - I2)
+      READ(11) (A(5, I), I=1, N-I2)
       
       CLOSE(11)
-      WRITE(*, *) 'Reading binary matrix from file:', FILENAME
+      WRITE(*, *) 'Reading matrix from binary file:', FILENAME
       RETURN
       END
       
       
-      SUBROUTINE READ_BINARY_VECTOR(FILENAME, N, F)
+      SUBROUTINE READ_VECTOR(FILENAME, N, F)
       CHARACTER*20 FILENAME
-      INTEGER N, I, IO_ERR
+      INTEGER N, I
       REAL F(N)  ! Вектор F хранится в следующих N элементах mem
       
-      OPEN(12, FILE=FILENAME, STATUS='OLD', ACCESS='DIRECT',
-     *     RECL=4, IOSTAT=IO_ERR)
-      IF (IO_ERR .NE. 0) THEN
-         WRITE(*, *) 'Error opening vector file:', FILENAME
-         STOP
-      END IF
-      
-      DO 600 I = 1, N
-         READ(12, REC=I, IOSTAT=IO_ERR) F(I)
-         IF (IO_ERR .NE. 0) THEN
-            WRITE(*, *) 'Error reading vector element:', I
-            STOP
-         END IF
- 600  CONTINUE
-      
+      OPEN(12, FILE=FILENAME, STATUS='OLD', ACCESS='STREAM')
+      READ(12) (F(I), I=1, N)
       CLOSE(12)
-      WRITE(*, *) 'Reading binary vector from file:', FILENAME
+      WRITE(*, *) 'Reading vector from binary file:', FILENAME
       RETURN
       END
       
       
       SUBROUTINE MULTIPLY_MATRIX_VECTOR(N, I1, I2, A, F, RESULT)
       INTEGER N, I1, I2, I
-      REAL A(5, N), F(N), RESULT(N)  ! RESULT хранится в последних N элементах mem
+      REAL A(5, N), F(N), RESULT(N)
       
-      DO 700 I = 1, N
-         RESULT(I) = A(3, I) * F(I)  ! Главная диагональ
-         IF (I .GT. 1) THEN
-            RESULT(I) = RESULT(I) + A(2, I-1) * F(I-1)  ! Над главной
-         END IF
-         IF (I1 .GT. 0 .AND. I .GT. I1) THEN
-            RESULT(I) = RESULT(I) + A(1, I-I1) * F(I-I1)  ! Верхняя
-         END IF
-         IF (I .LT. N) THEN
-            RESULT(I) = RESULT(I) + A(4, I) * F(I+1)  ! Под главной
-         END IF
-         IF (I2 .GT. 0 .AND. I .LE. N-I2) THEN
-            RESULT(I) = RESULT(I) + A(5, I) * F(I+I2)  ! Нижняя
-         END IF
- 700  CONTINUE
+      ! Инициализация результата и умножение на главную диагональ
+      DO 10 I = 1, N
+         RESULT(I) = A(3, I) * F(I)
+   10 CONTINUE
+      
+      ! Диагональ над главной
+      DO 20 I = 2, N
+         RESULT(I) = RESULT(I) + A(2, I-1) * F(I-1)
+   20 CONTINUE
+      
+      ! Верхняя диагональ
+      DO 30 I = I1 + 1, N
+         RESULT(I) = RESULT(I) + A(1, I-I1) * F(I-I1)
+   30 CONTINUE
+      
+      ! Диагональ под главной
+      DO 40 I = 1, N - 1
+         RESULT(I) = RESULT(I) + A(4, I) * F(I+1)
+   40 CONTINUE
+      
+      ! Нижняя диагональ
+      DO 50 I = 1, N - I2
+         RESULT(I) = RESULT(I) + A(5, I) * F(I+I2)
+   50 CONTINUE
+      
       WRITE(*, *) 'Multiplying matrix and vector'
       RETURN
       END
       
       
-      SUBROUTINE WRITE_VECTOR(FILENAME, N, F)
+      SUBROUTINE WRITE_VECTOR(FILENAME, N, RESULT)
       CHARACTER*20 FILENAME
-      INTEGER N, I, IO_ERR
-      REAL F(N)  ! RESULT хранится в последних N элементах mem
+      INTEGER N, I
+      REAL RESULT(N)  ! RESULT хранится в последних N элементах mem
       
-      OPEN(13, FILE=FILENAME, STATUS='REPLACE', IOSTAT=IO_ERR)
-      IF (IO_ERR .NE. 0) THEN
-         WRITE(*, *) 'Error opening result file:', FILENAME
-         STOP
-      END IF
-      
-      DO 800 I = 1, N
-         WRITE(13, '(F12.6)') F(I)
- 800  CONTINUE
-      
+      OPEN(13, FILE=FILENAME, STATUS='REPLACE')  ! Открываем текстовый файл
+      DO 200 I = 1, N
+         WRITE(13, '(F12.6)') RESULT(I)  ! Записываем каждое число с форматированием
+200   CONTINUE
       CLOSE(13)
-      WRITE(*, *) 'Writing result to file:', FILENAME
+      WRITE(*, *) 'Writing result to text file:', FILENAME
       RETURN
       END

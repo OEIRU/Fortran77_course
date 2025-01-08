@@ -30,18 +30,10 @@
       
       SUBROUTINE READ_DATA(FILENAME, N, I1, I2)
       CHARACTER*20 FILENAME
-      INTEGER N, I1, I2, IO_ERR
+      INTEGER N, I1, I2
       
-      OPEN(10, FILE=FILENAME, STATUS='OLD', IOSTAT=IO_ERR)
-      IF (IO_ERR .NE. 0) THEN
-         WRITE(*, *) 'Error opening file:', FILENAME
-         STOP
-      END IF
-      READ(10, *, IOSTAT=IO_ERR) N, I1, I2
-      IF (IO_ERR .NE. 0) THEN
-         WRITE(*, *) 'Error reading data from file:', FILENAME
-         STOP
-      END IF
+      OPEN(10, FILE=FILENAME, STATUS='OLD')
+      READ(10, *) N, I1, I2
       CLOSE(10)
       WRITE(*, *) 'Reading data from file:', FILENAME
       WRITE(*, *) 'N =', N, 'I1 =', I1, 'I2 =', I2
@@ -51,52 +43,25 @@
       
       SUBROUTINE READ_MATRIX(FILENAME, N, I1, I2, A)
       CHARACTER*20 FILENAME
-      INTEGER N, I1, I2, I, IO_ERR
+      INTEGER N, I1, I2, I
       REAL A(5, N)  ! Матрица A хранится в первых 5*N элементах mem
       
-      OPEN(11, FILE=FILENAME, STATUS='OLD', IOSTAT=IO_ERR)
-      IF (IO_ERR .NE. 0) THEN
-         WRITE(*, *) 'Error opening file:', FILENAME
-         STOP
-      END IF
+      OPEN(11, FILE=FILENAME, STATUS='OLD')
       
-      IF (I1 .GT. 0) THEN
-         READ(11, *, IOSTAT=IO_ERR) (A(1, I), I=1, N-I1)  ! Верхняя диагональ
-         IF (IO_ERR .NE. 0) THEN
-            WRITE(*, *) 'Error reading upper diagonal.'
-            STOP
-         END IF
-      END IF
+      ! Чтение верхней диагонали (длина N - I1)
+      READ(11, *) (A(1, I), I=1, N-I1)
       
-      IF (N-1 .GT. 0) THEN
-         READ(11, *, IOSTAT=IO_ERR) (A(2, I), I=1, N-1)   ! Над главной диагональю
-         IF (IO_ERR .NE. 0) THEN
-            WRITE(*, *) 'Error reading above main diagonal.'
-            STOP
-         END IF
-      END IF
+      ! Чтение диагонали над главной (длина N - 1)
+      READ(11, *) (A(2, I), I=1, N-1)
       
-      READ(11, *, IOSTAT=IO_ERR) (A(3, I), I=1, N)        ! Главная диагональ
-      IF (IO_ERR .NE. 0) THEN
-         WRITE(*, *) 'Error reading main diagonal.'
-         STOP
-      END IF
+      ! Чтение главной диагонали (длина N)
+      READ(11, *) (A(3, I), I=1, N)
       
-      IF (N-1 .GT. 0) THEN
-         READ(11, *, IOSTAT=IO_ERR) (A(4, I), I=1, N-1)   ! Под главной диагональю
-         IF (IO_ERR .NE. 0) THEN
-            WRITE(*, *) 'Error reading below main diagonal.'
-            STOP
-         END IF
-      END IF
+      ! Чтение диагонали под главной (длина N - 1)
+      READ(11, *) (A(4, I), I=1, N-1)
       
-      IF (I2 .GT. 0) THEN
-         READ(11, *, IOSTAT=IO_ERR) (A(5, I), I=1, N-I2)  ! Нижняя диагональ
-         IF (IO_ERR .NE. 0) THEN
-            WRITE(*, *) 'Error reading lower diagonal.'
-            STOP
-         END IF
-      END IF
+      ! Чтение нижней диагонали (длина N - I2)
+      READ(11, *) (A(5, I), I=1, N-I2)
       
       CLOSE(11)
       WRITE(*, *) 'Reading matrix from file:', FILENAME
@@ -106,19 +71,11 @@
       
       SUBROUTINE READ_VECTOR(FILENAME, N, F)
       CHARACTER*20 FILENAME
-      INTEGER N, I, IO_ERR
+      INTEGER N, I
       REAL F(N)  ! Вектор F хранится в следующих N элементах mem
       
-      OPEN(12, FILE=FILENAME, STATUS='OLD', IOSTAT=IO_ERR)
-      IF (IO_ERR .NE. 0) THEN
-         WRITE(*, *) 'Error opening file:', FILENAME
-         STOP
-      END IF
-      READ(12, *, IOSTAT=IO_ERR) (F(I), I=1, N)
-      IF (IO_ERR .NE. 0) THEN
-         WRITE(*, *) 'Error reading vector from file:', FILENAME
-         STOP
-      END IF
+      OPEN(12, FILE=FILENAME, STATUS='OLD')
+      READ(12, *) (F(I), I=1, N)
       CLOSE(12)
       WRITE(*, *) 'Reading vector from file:', FILENAME
       RETURN
@@ -127,63 +84,25 @@
       
       SUBROUTINE WRITE_BINARY_MATRIX(FILENAME, N, I1, I2, A)
       CHARACTER*20 FILENAME
-      INTEGER N, I1, I2, I, IO_ERR
+      INTEGER N, I1, I2, I
       REAL A(5, N)  ! Матрица A хранится в первых 5*N элементах mem
       
-      OPEN(14, FILE=FILENAME, STATUS='REPLACE', ACCESS='DIRECT',
-     *     RECL=4, IOSTAT=IO_ERR)
-      IF (IO_ERR .NE. 0) THEN
-         WRITE(*, *) 'Error opening binary file:', FILENAME
-         STOP
-      END IF
+      OPEN(14, FILE=FILENAME, STATUS='REPLACE', ACCESS='STREAM')
       
-      IF (I1 .GT. 0) THEN
-         DO 100 I = 1, N-I1
-            WRITE(14, REC=I, IOSTAT=IO_ERR) A(1, I)  ! Верхняя диагональ
-            IF (IO_ERR .NE. 0) THEN
-               WRITE(*, *) 'Error writing upper diagonal.'
-               STOP
-            END IF
- 100     CONTINUE
-      END IF
+      ! Запись верхней диагонали (длина N - I1)
+      WRITE(14) (A(1, I), I=1, N-I1)
       
-      IF (N-1 .GT. 0) THEN
-         DO 200 I = 1, N-1
-            WRITE(14, REC=N-I1+I, IOSTAT=IO_ERR) A(2, I)  ! Над главной диагональю
-            IF (IO_ERR .NE. 0) THEN
-               WRITE(*, *) 'Error writing above main diagonal.'
-               STOP
-            END IF
- 200     CONTINUE
-      END IF
+      ! Запись диагонали над главной (длина N - 1)
+      WRITE(14) (A(2, I), I=1, N-1)
       
-      DO 300 I = 1, N
-         WRITE(14, REC=2*N-I1+I, IOSTAT=IO_ERR) A(3, I)  ! Главная диагональ
-         IF (IO_ERR .NE. 0) THEN
-            WRITE(*, *) 'Error writing main diagonal.'
-            STOP
-         END IF
- 300  CONTINUE
+      ! Запись главной диагонали (длина N)
+      WRITE(14) (A(3, I), I=1, N)
       
-      IF (N-1 .GT. 0) THEN
-         DO 400 I = 1, N-1
-            WRITE(14, REC=3*N-I1+I, IOSTAT=IO_ERR) A(4, I)  ! Под главной диагональю
-            IF (IO_ERR .NE. 0) THEN
-               WRITE(*, *) 'Error writing below main diagonal.'
-               STOP
-            END IF
- 400     CONTINUE
-      END IF
+      ! Запись диагонали под главной (длина N - 1)
+      WRITE(14) (A(4, I), I=1, N-1)
       
-      IF (I2 .GT. 0) THEN
-         DO 500 I = 1, N-I2
-            WRITE(14, REC=4*N-I1+I, IOSTAT=IO_ERR) A(5, I)  ! Нижняя диагональ
-            IF (IO_ERR .NE. 0) THEN
-               WRITE(*, *) 'Error writing lower diagonal.'
-               STOP
-            END IF
- 500     CONTINUE
-      END IF
+      ! Запись нижней диагонали (длина N - I2)
+      WRITE(14) (A(5, I), I=1, N-I2)
       
       CLOSE(14)
       WRITE(*, *) 'Writing binary matrix to file:', FILENAME
@@ -193,24 +112,11 @@
       
       SUBROUTINE WRITE_BINARY_VECTOR(FILENAME, N, F)
       CHARACTER*20 FILENAME
-      INTEGER N, I, IO_ERR
+      INTEGER N, I
       REAL F(N)  ! Вектор F хранится в следующих N элементах mem
       
-      OPEN(15, FILE=FILENAME, STATUS='REPLACE', ACCESS='DIRECT',
-     *     RECL=4, IOSTAT=IO_ERR)
-      IF (IO_ERR .NE. 0) THEN
-         WRITE(*, *) 'Error opening binary file:', FILENAME
-         STOP
-      END IF
-      
-      DO 600 I = 1, N
-         WRITE(15, REC=I, IOSTAT=IO_ERR) F(I)
-         IF (IO_ERR .NE. 0) THEN
-            WRITE(*, *) 'Error writing vector to file:', FILENAME
-            STOP
-         END IF
- 600  CONTINUE
-      
+      OPEN(15, FILE=FILENAME, STATUS='REPLACE', ACCESS='STREAM')
+      WRITE(15) (F(I), I=1, N)
       CLOSE(15)
       WRITE(*, *) 'Writing binary vector to file:', FILENAME
       RETURN
