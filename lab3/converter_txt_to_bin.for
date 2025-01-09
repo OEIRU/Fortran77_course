@@ -9,29 +9,16 @@
       VECTOR_FILE = 'vector.txt'
       MATRIX_BIN = 'matrix.bin'
       VECTOR_BIN = 'vector.bin'
-      
-      ! Чтение данных из текстового файла
       CALL READ_DATA(DATA_FILE, N, I1, I2)
-      
-      ! Чтение матрицы из текстового файла в mem
       CALL READ_MATRIX(MATRIX_FILE, N, I1, I2, mem(1))
-      
-      ! Чтение вектора из текстового файла в mem
       CALL READ_VECTOR(VECTOR_FILE, N, mem(5*N + 1))
-      
-      ! Запись матрицы из mem в бинарный файл
       CALL WRITE_BINARY_MATRIX(MATRIX_BIN, N, I1, I2, mem(1))
-      
-      ! Запись вектора из mem в бинарный файл
       CALL WRITE_BINARY_VECTOR(VECTOR_BIN, N, mem(5*N + 1))
-      
       END
-      
       
       SUBROUTINE READ_DATA(FILENAME, N, I1, I2)
       CHARACTER*20 FILENAME
       INTEGER N, I1, I2
-      
       OPEN(10, FILE=FILENAME, STATUS='OLD')
       READ(10, *) N, I1, I2
       CLOSE(10)
@@ -40,40 +27,25 @@
       RETURN
       END
       
-      
       SUBROUTINE READ_MATRIX(FILENAME, N, I1, I2, A)
       CHARACTER*20 FILENAME
       INTEGER N, I1, I2, I
       REAL A(5, N)  ! Матрица A хранится в первых 5*N элементах mem
-      
       OPEN(11, FILE=FILENAME, STATUS='OLD')
-      
-      ! Чтение верхней диагонали (длина N - I1)
-      READ(11, *) (A(1, I), I=1, N-I1)
-      
-      ! Чтение диагонали над главной (длина N - 1)
-      READ(11, *) (A(2, I), I=1, N-1)
-      
-      ! Чтение главной диагонали (длина N)
-      READ(11, *) (A(3, I), I=1, N)
-      
-      ! Чтение диагонали под главной (длина N - 1)
-      READ(11, *) (A(4, I), I=1, N-1)
-      
-      ! Чтение нижней диагонали (длина N - I2)
-      READ(11, *) (A(5, I), I=1, N-I2)
-      
+      READ(11, *) (A(1, I), I=1, N-I1)  ! Верхняя диагональ
+      READ(11, *) (A(2, I), I=1, N-1)   ! Диагональ над главной
+      READ(11, *) (A(3, I), I=1, N)     ! Главная диагональ
+      READ(11, *) (A(4, I), I=1, N-1)   ! Диагональ под главной
+      READ(11, *) (A(5, I), I=1, N-I2)  ! Нижняя диагональ
       CLOSE(11)
       WRITE(*, *) 'Reading matrix from file:', FILENAME
       RETURN
       END
       
-      
       SUBROUTINE READ_VECTOR(FILENAME, N, F)
       CHARACTER*20 FILENAME
       INTEGER N, I
       REAL F(N)  ! Вектор F хранится в следующих N элементах mem
-      
       OPEN(12, FILE=FILENAME, STATUS='OLD')
       READ(12, *) (F(I), I=1, N)
       CLOSE(12)
@@ -81,40 +53,25 @@
       RETURN
       END
       
-      
       SUBROUTINE WRITE_BINARY_MATRIX(FILENAME, N, I1, I2, A)
       CHARACTER*20 FILENAME
       INTEGER N, I1, I2, I
       REAL A(5, N)  ! Матрица A хранится в первых 5*N элементах mem
-      
       OPEN(14, FILE=FILENAME, STATUS='REPLACE', ACCESS='STREAM')
-      
-      ! Запись верхней диагонали (длина N - I1)
-      WRITE(14) (A(1, I), I=1, N-I1)
-      
-      ! Запись диагонали над главной (длина N - 1)
-      WRITE(14) (A(2, I), I=1, N-1)
-      
-      ! Запись главной диагонали (длина N)
-      WRITE(14) (A(3, I), I=1, N)
-      
-      ! Запись диагонали под главной (длина N - 1)
-      WRITE(14) (A(4, I), I=1, N-1)
-      
-      ! Запись нижней диагонали (длина N - I2)
-      WRITE(14) (A(5, I), I=1, N-I2)
-      
+      WRITE(14) (A(1, I), I=1, N-I1)  ! Верхняя диагональ
+      WRITE(14) (A(2, I), I=1, N-1)   ! Диагональ над главной
+      WRITE(14) (A(3, I), I=1, N)     ! Главная диагональ
+      WRITE(14) (A(4, I), I=1, N-1)   ! Диагональ под главной
+      WRITE(14) (A(5, I), I=1, N-I2)  ! Нижняя диагональ
       CLOSE(14)
       WRITE(*, *) 'Writing binary matrix to file:', FILENAME
       RETURN
       END
       
-      
       SUBROUTINE WRITE_BINARY_VECTOR(FILENAME, N, F)
       CHARACTER*20 FILENAME
       INTEGER N, I
       REAL F(N)  ! Вектор F хранится в следующих N элементах mem
-      
       OPEN(15, FILE=FILENAME, STATUS='REPLACE', ACCESS='STREAM')
       WRITE(15) (F(I), I=1, N)
       CLOSE(15)

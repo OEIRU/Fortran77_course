@@ -17,11 +17,9 @@
       
       END
       
-      
       SUBROUTINE READ_DATA(FILENAME, N, I1, I2)
       CHARACTER*20 FILENAME
       INTEGER N, I1, I2
-      
       OPEN(10, FILE=FILENAME, STATUS='OLD')
       READ(10, *) N, I1, I2
       CLOSE(10)
@@ -30,40 +28,25 @@
       RETURN
       END
       
-      
       SUBROUTINE READ_MATRIX(FILENAME, N, I1, I2, A)
       CHARACTER*20 FILENAME
       INTEGER N, I1, I2, I
       REAL A(5, N)  ! Матрица A хранится в первых 5*N элементах mem
-      
       OPEN(11, FILE=FILENAME, STATUS='OLD')
-      
-      ! Чтение верхней диагонали (длина N - I1)
       READ(11, *) (A(1, I), I=1, N-I1)
-      
-      ! Чтение диагонали над главной (длина N - 1)
       READ(11, *) (A(2, I), I=1, N-1)
-      
-      ! Чтение главной диагонали (длина N)
       READ(11, *) (A(3, I), I=1, N)
-      
-      ! Чтение диагонали под главной (длина N - 1)
       READ(11, *) (A(4, I), I=1, N-1)
-      
-      ! Чтение нижней диагонали (длина N - I2)
       READ(11, *) (A(5, I), I=1, N-I2)
-      
       CLOSE(11)
       WRITE(*, *) 'Reading matrix from file:', FILENAME
       RETURN
       END
       
-      
       SUBROUTINE READ_VECTOR(FILENAME, N, F)
       CHARACTER*20 FILENAME
       INTEGER N, I
       REAL F(N)  ! Вектор F хранится в следующих N элементах mem
-      
       OPEN(12, FILE=FILENAME, STATUS='OLD')
       READ(12, *) (F(I), I=1, N)
       CLOSE(12)
@@ -71,46 +54,32 @@
       RETURN
       END
       
-      
       SUBROUTINE MULTIPLY_MATRIX_VECTOR(N, I1, I2, A, F, RESULT)
       INTEGER N, I1, I2, I
       REAL A(5, N), F(N), RESULT(N)
-      
-      ! Инициализация результата и умножение на главную диагональ
       DO 10 I = 1, N
          RESULT(I) = A(3, I) * F(I)
    10 CONTINUE
-      
-      ! Диагональ над главной
       DO 20 I = 2, N
          RESULT(I) = RESULT(I) + A(2, I-1) * F(I-1)
    20 CONTINUE
-      
-      ! Верхняя диагональ
       DO 30 I = I1 + 1, N
          RESULT(I) = RESULT(I) + A(1, I-I1) * F(I-I1)
    30 CONTINUE
-      
-      ! Диагональ под главной
       DO 40 I = 1, N - 1
          RESULT(I) = RESULT(I) + A(4, I) * F(I+1)
    40 CONTINUE
-      
-      ! Нижняя диагональ
       DO 50 I = 1, N - I2
          RESULT(I) = RESULT(I) + A(5, I) * F(I+I2)
    50 CONTINUE
-      
       WRITE(*, *) 'Multiplying matrix and vector'
       RETURN
       END
-      
       
       SUBROUTINE WRITE_VECTOR(FILENAME, N, RESULT)
       CHARACTER*20 FILENAME
       INTEGER N, I
       REAL RESULT(N)  ! RESULT хранится в последних N элементах mem
-      
       OPEN(13, FILE=FILENAME, STATUS='REPLACE')
       DO 200 I = 1, N
          WRITE(13, '(F12.6)') RESULT(I)
