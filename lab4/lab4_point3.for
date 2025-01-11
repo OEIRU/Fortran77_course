@@ -13,66 +13,47 @@
       ! Исследование для метода трапеций
       METHOD_NAME = 'Trapezoid'
       FUNC_NAME = 'Poly k+3'
-      N_SEGMENTS = 1  ! Минимальное N для метода трапеций
+      N_SEGMENTS = 2  ! Минимальное N для метода трапеций
       CALL CONVERGENCE_TABLE(METHOD_NAME, 2, A, B, N_SEGMENTS, 
      &                       POLY_FUNC, FUNC_NAME)
 
       FUNC_NAME = 'Oscillating'
-      N_SEGMENTS = 1  ! Минимальное N для метода трапеций
+      N_SEGMENTS = 2  ! Минимальное N для метода трапеций
       CALL CONVERGENCE_TABLE(METHOD_NAME, 2, A, B, N_SEGMENTS, 
      &                       OSC_FUNC, FUNC_NAME)
 
       ! Исследование для метода Гаусса-4
       METHOD_NAME = 'Gauss-4'
       FUNC_NAME = 'Poly k+3'
-      N_SEGMENTS = 1  ! Минимальное N для метода Гаусса-4
+      N_SEGMENTS = 2  ! Минимальное N для метода Гаусса-4
       CALL CONVERGENCE_TABLE(METHOD_NAME, 8, A, B, N_SEGMENTS, 
      &                       POLY_FUNC, FUNC_NAME)
 
       FUNC_NAME = 'Oscillating'
-      N_SEGMENTS = 1  ! Минимальное N для метода Гаусса-4
+      N_SEGMENTS = 2  ! Минимальное N для метода Гаусса-4
       CALL CONVERGENCE_TABLE(METHOD_NAME, 8, A, B, N_SEGMENTS, 
      &                       OSC_FUNC, FUNC_NAME)
       END
 
-      ! Подпрограмма для создания сетки
-      SUBROUTINE CREATE_GRID(A, B, N, X, METHOD_NAME)
-      REAL A, B, X(*)
-      INTEGER N
-      CHARACTER*(*) METHOD_NAME
-      INTEGER I
-      REAL H
 
-      IF (METHOD_NAME .EQ. 'Trapezoid') THEN
-          H = (B - A) / (N - 1)
-          DO I = 1, N
-              X(I) = A + (I-1)*H
-          END DO
-      ELSE IF (METHOD_NAME .EQ. 'Gauss-4') THEN
-          H = (B - A) / N
-          DO I = 1, N + 1
-              X(I) = A + (I-1)*H
-          END DO
-      END IF
-      END
-
-      ! Метод трапеций
-      SUBROUTINE TRAPEZOID_RULE(X, N, INTEGRAL, FUNC)
-      REAL X(N), INTEGRAL, H
+      ! Метод трапеций (без массива X)
+      SUBROUTINE TRAPEZOID_RULE(A, B, N, INTEGRAL, FUNC)
+      REAL A, B, INTEGRAL, H, X
       INTEGER I, N
       REAL FUNC
       EXTERNAL FUNC
 
       INTEGRAL = 0.0
-      DO I = 1, N-1
-          H = X(I+1) - X(I)
-          INTEGRAL = INTEGRAL + H * (FUNC(X(I)) + FUNC(X(I+1))) / 2.0
+      H = (B - A) / N
+      DO I = 0, N-1
+          X = A + I * H
+          INTEGRAL = INTEGRAL + (FUNC(X) + FUNC(X + H)) * H / 2.0
       END DO
       END
 
-      ! Метод Гаусса-4
-      SUBROUTINE GAUSS4_RULE(X, N, INTEGRAL, FUNC)
-      REAL X(N+1), INTEGRAL, H, MID
+      ! Метод Гаусса-4 (без массива X)
+      SUBROUTINE GAUSS4_RULE(A, B, N, INTEGRAL, FUNC)
+      REAL A, B, INTEGRAL, H, A_I, B_I, MID, T_J
       REAL W(4), XI(4)
       INTEGER I, J, N
       REAL FUNC
@@ -83,12 +64,19 @@
       DATA XI /-0.8611363116, -0.3399810436, 0.3399810436, 0.8611363116/
 
       INTEGRAL = 0.0
-      DO I = 1, N
-          MID = (X(I) + X(I+1)) / 2.0
-          H = (X(I+1) - X(I)) / 2.0
-          DO J = 1, 4
-              INTEGRAL = INTEGRAL + W(J) * FUNC(MID + H * XI(J)) * H
-          END DO
+      H = (B - A) / N  ! Шаг разбиения
+
+      ! Цикл по подынтервалам
+      DO I = 0, N-1
+        A_I = A + I * H  ! Начало подынтервала
+        B_I = A_I + H    ! Конец подынтервала
+        MID = (A_I + B_I) / 2.0  ! Середина подынтервала
+
+        ! Цикл по узлам Гаусса-4
+        DO J = 1, 4
+            T_J = MID + (H / 2.0) * XI(J)  ! Масштабирование узла
+            INTEGRAL = INTEGRAL + W(J) * FUNC(T_J) * (H / 2.0)
+        END DO
       END DO
       END
 
@@ -96,28 +84,39 @@
       REAL FUNCTION ANALYTIC_INTEGRAL(A, B, FUNC_NAME)
       REAL A, B
       CHARACTER*(*) FUNC_NAME
+      INTEGER IS_POLY, IS_OSC
 
-      IF (FUNC_NAME .EQ. 'Poly k+3') THEN
-          ANALYTIC_INTEGRAL = (B**5 - A**5) / 5.0  ! Интеграл x^5
-      ELSE IF (FUNC_NAME .EQ. 'Oscillating') THEN
-          ANALYTIC_INTEGRAL = (-COS(10.0 * B) + COS(10.0 * A)) / 10.0
-      ELSE
-          ANALYTIC_INTEGRAL = 0.0
-      END IF
+      ! Определяем, какая функция используется
+      IS_POLY = 0
+      IS_OSC = 0
+      IF (FUNC_NAME .EQ. 'Poly k+3') IS_POLY = 1
+      IF (FUNC_NAME .EQ. 'Oscillating') IS_OSC = 1
+
+      ! Вычисляем аналитическое значение интеграла
+      ANALYTIC_INTEGRAL = IS_POLY * (B**6 - A**6) / 6.0
+     &                  + IS_OSC * (-COS(10.0 * B) + COS(10.0 * A)) / 10.0
       END
 
       ! Подпрограмма для исследования порядка аппроксимации
       SUBROUTINE CONVERGENCE_TABLE(METHOD_NAME, K, A, B, N_SEGMENTS, 
-     &  FUNC, FUNC_NAME)
+     &                             FUNC, FUNC_NAME)
       CHARACTER*(*) METHOD_NAME, FUNC_NAME
       INTEGER K, N_SEGMENTS
       REAL A, B
       REAL FUNC
       EXTERNAL FUNC
-      REAL X(1000000), INTEGRAL, ANALYTIC, ERROR, PREV_ERROR
+      REAL INTEGRAL, ANALYTIC, ERROR, PREV_ERROR, MIN_ERROR
       REAL RUNGE_ERROR, RICHARDSON, RICHARDSON_ERROR
       REAL PREV_INTEGRAL, RATIO_ERROR, EST_RATIO_ERROR
-      INTEGER STEP, STOP_COUNTER
+      INTEGER STEP, ITER_AFTER_MIN
+      INTEGER IS_TRAPEZOID, IS_GAUSS
+      LOGICAL FLAG_MIN
+
+      ! Определяем, какой метод используется
+      IS_TRAPEZOID = 0
+      IS_GAUSS = 0
+      IF (METHOD_NAME .EQ. 'Trapezoid') IS_TRAPEZOID = 1
+      IF (METHOD_NAME .EQ. 'Gauss-4') IS_GAUSS = 1
 
       ANALYTIC = ANALYTIC_INTEGRAL(A, B, FUNC_NAME)
       WRITE(*, *) 'Method: ', METHOD_NAME
@@ -126,72 +125,82 @@
       WRITE(*, *) 'Analytic: ', ANALYTIC
       WRITE(*, *) '-------------------------------------------'
 
-      STOP_COUNTER = 0
       PREV_ERROR = 1.0E30  ! Большое начальное значение для первой итерации
       PREV_INTEGRAL = 0.0
+      FLAG_MIN = .FALSE.   ! Флаг для минимальной ошибки
+      ITER_AFTER_MIN = 0   ! Счетчик итераций после достижения минимальной ошибки
+      MIN_ERROR = 1.0E30   ! Минимальная ошибка
 
       STEP = 1
-      DO WHILE (STOP_COUNTER .LT. 3)  ! Остановка после 3 шагов без улучшения
-          ! Вычисление для N отрезков
-          CALL CREATE_GRID(A, B, N_SEGMENTS, X, METHOD_NAME)
-          IF (METHOD_NAME .EQ. 'Trapezoid') THEN
-              CALL TRAPEZOID_RULE(X, N_SEGMENTS + 1, INTEGRAL, FUNC)
-          ELSE IF (METHOD_NAME .EQ. 'Gauss-4') THEN
-              CALL GAUSS4_RULE(X, N_SEGMENTS, INTEGRAL, FUNC)
-          END IF
-          ERROR = ABS(ANALYTIC - INTEGRAL)
+      DO WHILE (N_SEGMENTS .LE. 1E9)  ! Ограничение на количество итераций
+        ! Вычисление для N отрезков
+        IF (IS_TRAPEZOID .EQ. 1) THEN
+            CALL TRAPEZOID_RULE(A, B, N_SEGMENTS, INTEGRAL, FUNC)
+        ELSE IF (IS_GAUSS .EQ. 1) THEN
+            CALL GAUSS4_RULE(A, B, N_SEGMENTS, INTEGRAL, FUNC)
+        END IF
+        ERROR = ABS(ANALYTIC - INTEGRAL)
 
-          ! Отношение погрешностей
-          IF (STEP .GT. 1) THEN
-              RATIO_ERROR = PREV_ERROR / ERROR
-              EST_RATIO_ERROR = 2.0**K  ! Оценка отношения погрешностей
-          ELSE
-              RATIO_ERROR = 0.0
-              EST_RATIO_ERROR = 0.0
-          END IF
+        ! Отношение погрешностей
+        RATIO_ERROR = 0.0
+        EST_RATIO_ERROR = 0.0
+        IF (STEP .GT. 1) THEN
+            RATIO_ERROR = PREV_ERROR / ERROR
+            EST_RATIO_ERROR = 2.0**K
+        END IF
 
-          ! Оценка по правилу Рунге
-          IF (STEP .GT. 1) THEN
-              RUNGE_ERROR = (INTEGRAL - PREV_INTEGRAL) / (2**K - 1)
-          ELSE
-              RUNGE_ERROR = 0.0
-          END IF
+        ! Оценка по правилу Рунге
+        RUNGE_ERROR = 0.0
+        IF (STEP .GT. 1) THEN
+            RUNGE_ERROR = (INTEGRAL - PREV_INTEGRAL) / (2**K - 1)
+        END IF
 
-          ! Уточнение по Ричардсону
-          IF (STEP .GT. 1) THEN
-              RICHARDSON = INTEGRAL + (INTEGRAL - PREV_INTEGRAL) / 
-     &                  (2**K - 1)
-              RICHARDSON_ERROR = ABS(ANALYTIC - RICHARDSON)
-          ELSE
-              RICHARDSON = 0.0
-              RICHARDSON_ERROR = 0.0
-          END IF
+        ! Уточнение по Ричардсону
+        RICHARDSON = 0.0
+        RICHARDSON_ERROR = 0.0
+        IF (STEP .GT. 1) THEN
+            RICHARDSON = INTEGRAL + (INTEGRAL - PREV_INTEGRAL) / 
+     &                   (2**K - 1)
+            RICHARDSON_ERROR = ABS(ANALYTIC - RICHARDSON)
+        END IF
 
-          ! Вывод данных для текущего N
-          WRITE(*, 100) 'N: ', N_SEGMENTS
-          WRITE(*, 101) 'Numeric: ', INTEGRAL
-          WRITE(*, 101) 'Ratio Error: ', RATIO_ERROR
-          WRITE(*, 101) 'Estimated Ratio: ', EST_RATIO_ERROR
-          WRITE(*, 101) 'Error: ', ERROR
-          WRITE(*, 101) 'Runge Error: ', RUNGE_ERROR
-          WRITE(*, 101) 'Richardson: ', RICHARDSON
-          WRITE(*, 101) 'Richardson Error: ', RICHARDSON_ERROR
-          WRITE(*, *) '-------------------------------------------'
+        ! Вывод данных для текущего N
+        WRITE(*, 100) 'N: ', N_SEGMENTS
+        WRITE(*, 101) 'Numeric: ', INTEGRAL
+        WRITE(*, 101) 'Ratio Error: ', RATIO_ERROR
+        WRITE(*, 101) 'Estimated Ratio: ', EST_RATIO_ERROR
+        WRITE(*, 101) 'Error: ', ERROR
+        WRITE(*, 101) 'Runge Error: ', RUNGE_ERROR
+        WRITE(*, 101) 'Richardson: ', RICHARDSON
+        WRITE(*, 101) 'Richardson Error: ', RICHARDSON_ERROR
+        WRITE(*, *) '-------------------------------------------'
 
-100     FORMAT(A, I6)
-101     FORMAT(A, F20.15)
+100     FORMAT(A, I60)
+101     FORMAT(A, F30.15)
 
-          ! Проверка условия остановки
-          IF (ERROR .GE. PREV_ERROR) THEN
-              STOP_COUNTER = STOP_COUNTER + 1
-          ELSE
-              STOP_COUNTER = 0
-          END IF
+        ! Проверка на минимальную ошибку
+        IF (ERROR .LT. MIN_ERROR) THEN
+            MIN_ERROR = ERROR  ! Обновляем минимальную ошибку
+            FLAG_MIN = .TRUE.  ! Активируем флаг минимальной ошибки
+            ITER_AFTER_MIN = 0 ! Сбрасываем счетчик итераций
+        END IF
 
-          PREV_ERROR = ERROR
-          PREV_INTEGRAL = INTEGRAL
-          N_SEGMENTS = N_SEGMENTS * 2
-          STEP = STEP + 1
+        ! Если минимальная ошибка достигнута, увеличиваем счетчик итераций
+        IF (FLAG_MIN) THEN
+            ITER_AFTER_MIN = ITER_AFTER_MIN + 1
+        END IF
+
+        ! Если выполнено 3 итерации после достижения минимальной ошибки, завершаем цикл
+        IF (ITER_AFTER_MIN .GE. 3) THEN
+           !WRITE(*, *) 'Stopping after 3 iterations post minimum error.'
+            EXIT
+        END IF
+
+        ! Обновление предыдущих значений
+        PREV_ERROR = ERROR
+        PREV_INTEGRAL = INTEGRAL
+        N_SEGMENTS = N_SEGMENTS * 2
+        STEP = STEP + 1
       END DO
       END
 

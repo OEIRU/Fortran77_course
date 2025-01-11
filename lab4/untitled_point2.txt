@@ -1,0 +1,147 @@
+ Method: Trapezoid
+ Order of method:            2
+ -------------------------------------------
+ Degree:            1
+ N:            1
+ Analytic:   0.500000000    
+ Numeric:   0.500000000    
+ Error:    0.00000000    
+ Ratio:    0.00000000    
+ Runge Error:    0.00000000    
+ Richardson:   0.500000000    
+ Richardson Error:    0.00000000    
+ -------------------------------------------
+ Degree:            2
+ N:            1
+ Analytic:   0.333333343    
+ Numeric:   0.500000000    
+ Error:   0.166666657    
+ Ratio:   0.249999955    
+ Runge Error:    1.38888853E-02
+ Richardson:   0.541666687    
+ Richardson Error:   0.208333343    
+ -------------------------------------------
+ Degree:            2
+ N:            2
+ Analytic:   0.333333343    
+ Numeric:   0.375000000    
+ Error:    4.16666567E-02
+ Ratio:   0.249999821    
+ Runge Error:    3.47221899E-03
+ Richardson:   0.385416657    
+ Richardson Error:    5.20833135E-02
+ -------------------------------------------
+ Degree:            3
+ N:            1
+ Analytic:   0.250000000    
+ Numeric:   0.500000000    
+ Error:   0.250000000    
+ Ratio:   0.250000000    
+ Runge Error:    2.08333340E-02
+ Richardson:   0.562500000    
+ Richardson Error:   0.312500000    
+ -------------------------------------------
+ Degree:            3
+ N:            2
+ Analytic:   0.250000000    
+ Numeric:   0.312500000    
+ Error:    6.25000000E-02
+ Ratio:   0.250000000    
+ Runge Error:    5.20833349E-03
+ Richardson:   0.328125000    
+ Richardson Error:    7.81250000E-02
+ -------------------------------------------
+ Degree:            4
+ N:            1
+ Analytic:   0.200000003    
+ Numeric:   0.500000000    
+ Error:   0.300000012    
+ Ratio:   0.270833313    
+ Runge Error:    2.70833317E-02
+ Richardson:   0.572916687    
+ Richardson Error:   0.372916698    
+ -------------------------------------------
+ Degree:            4
+ N:            2
+ Analytic:   0.200000003    
+ Numeric:   0.281250000    
+ Error:    8.12499970E-02
+ Ratio:   0.254807651    
+ Runge Error:    6.90104067E-03
+ Richardson:   0.301432282    
+ Richardson Error:   0.101432279    
+ -------------------------------------------
+ Method: Gauss-4
+ Order of method:            8
+ -------------------------------------------
+ Degree:            1
+ N:            1
+ Analytic:   0.500000000    
+ Numeric:   0.500000000    
+ Error:    0.00000000    
+ Ratio:    0.00000000    
+ Runge Error:    0.00000000    
+ Richardson:   0.500000000    
+ Richardson Error:    0.00000000    
+ -------------------------------------------
+ Degree:            2
+ N:            1
+ Analytic:   0.333333343    
+ Numeric:   0.333333313    
+ Error:    2.98023224E-08
+ Ratio:    1.00000000    
+ Runge Error:    1.16871859E-10
+ Richardson:   0.333333313    
+ Richardson Error:    2.98023224E-08
+ -------------------------------------------
+ Degree:            2
+ N:            2
+ Analytic:   0.333333343    
+ Numeric:   0.333333313    
+ Error:    2.98023224E-08
+ Ratio:    1.00000000    
+ Runge Error:    1.16871859E-10
+ Richardson:   0.333333313    
+ Richardson Error:    2.98023224E-08
+ -------------------------------------------
+ Degree:            3
+ N:            1
+ Analytic:   0.250000000    
+ Numeric:   0.250000000    
+ Error:    0.00000000    
+ Ratio:    0.00000000    
+ Runge Error:    0.00000000    
+ Richardson:   0.250000000    
+ Richardson Error:    0.00000000    
+ -------------------------------------------
+ Degree:            3
+ N:            2
+ Analytic:   0.250000000    
+ Numeric:   0.250000000    
+ Error:    0.00000000    
+ Ratio:    0.00000000    
+ Runge Error:    0.00000000    
+ Richardson:   0.250000000    
+ Richardson Error:    0.00000000    
+ -------------------------------------------
+ Degree:            4
+ N:            1
+ Analytic:   0.200000003    
+ Numeric:   0.200000003    
+ Error:    0.00000000    
+ Ratio:    0.00000000    
+ Runge Error:    5.84359297E-11
+ Richardson:   0.200000003    
+ Richardson Error:    0.00000000    
+ -------------------------------------------
+ Degree:            4
+ N:            2
+ Analytic:   0.200000003    
+ Numeric:   0.200000018    
+ Error:    1.49011612E-08
+ Ratio:    1.00000000    
+ Runge Error:    5.84359297E-11
+ Richardson:   0.200000018    
+ Richardson Error:    1.49011612E-08
+ -------------------------------------------
+ 
