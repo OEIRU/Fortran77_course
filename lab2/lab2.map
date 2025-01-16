@@ -1,0 +1,112 @@
+Open Watcom Linker Version 1.9
+Portions Copyright (c) 1985-2002 Sybase, Inc. All Rights Reserved.
+Created on:       25/01/12 19:47:39
+Warning! W1080: file lab2.obj is a 32-bit object file
+Warning! W1008: cannot open flib7.lib : No such file or directory
+Warning! W1008: cannot open math387r.lib : No such file or directory
+Warning! W1008: cannot open clib3r.lib : No such file or directory
+Warning! W1008: cannot open emu387.lib : No such file or directory
+Executable Image: lab2.exe
+creating a DOS executable
+Error! E2028: RT@SetUnit is an undefined reference
+Error! E2028: RT@SetFile is an undefined reference
+Error! E2028: RT@SetStat is an undefined reference
+Error! E2028: RT@SetErr is an undefined reference
+Error! E2028: RT@IOOpen is an undefined reference
+Error! E2028: RT@IORead is an undefined reference
+Error! E2028: RT@InpDBLE is an undefined reference
+Error! E2028: RT@EndIO is an undefined reference
+Error! E2028: RT@IOClose is an undefined reference
+Error! E2028: RT@IOWrite is an undefined reference
+Error! E2028: RT@OutCHAR is an undefined reference
+Error! E2028: RT@Stop is an undefined reference
+Error! E2028: IF@DACOS is an undefined reference
+Error! E2028: RT@SetIntl is an undefined reference
+Error! E2028: RT@SetFmt is an undefined reference
+Error! E2028: RT@OutDBLE is an undefined reference
+Error! E2028: RT@Move is an undefined reference
+Error! E2028: __CHP is an undefined reference
+Error! E2028: _cstart_ is an undefined reference
+Error! E2028: __8087 is an undefined reference
+Error! E2028: __init_387_emulator is an undefined reference
+Error! E2028: __init_english is an undefined reference
+Error! E2028: __init_error is an undefined reference
+
+
+                        +------------+
+                        |   Groups   |
+                        +------------+
+
+Group                           Address              Size
+=====                           =======              ====
+
+DGROUP                          0000:0000            00003040
+
+
+
+                        +--------------+
+                        |   Segments   |
+                        +--------------+
+
+Segment                Class          Group          Address         Size
+=======                =====          =====          =======         ====
+
+CONST                  DATA           DGROUP         0000:0000       000000e0
+_DATA                  DATA           DGROUP         000e:0000       00000080
+_BSS                   BSS            DGROUP         0016:0000       00000000
+GDATA@0                BSS            DGROUP         0016:0000       00002ee0
+_TEXT                  CODE           AUTO           0304:0000       000006b6
+
+
+                        +----------------+
+                        |   Memory Map   |
+                        +----------------+
+
+* = unreferenced symbol
++ = symbol only referenced locally
+
+Address        Symbol
+=======        ======
+
+Module: lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+0304:00000000* FMAIN
+0304:00000042+ READ_PARAMS
+0304:00000135* TO_RAD
+0304:00000144+ MY_ARCCOS
+0304:0000014b+ WRITE_ROW
+0304:000002d7+ CREATE_TABLE
+Warning! W1014: stack segment not found
+Warning! W1023: no starting address found, using 0000:0000
+
+
+                        +---------------------------+
+                        |   Unresolved References   |
+                        +---------------------------+
+
+Undefined Symbol                Referenced by
+================                =============
+
+RT@SetUnit                      lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+RT@SetFile                      lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+RT@SetStat                      lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+RT@SetErr                       lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+RT@IOOpen                       lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+RT@IORead                       lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+RT@InpDBLE                      lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+RT@EndIO                        lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+RT@IOClose                      lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+RT@IOWrite                      lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+RT@OutCHAR                      lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+RT@Stop                         lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+IF@DACOS                        lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+RT@SetIntl                      lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+RT@SetFmt                       lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+RT@OutDBLE                      lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+RT@Move                         lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+__CHP                           lab2.obj(C:\Users\VKostovsky\Documents\Git_work\Fortran77_course\Fortran77_course\lab2\lab2.for)
+
+
+                        +--------------------+
+                        |   Libraries Used   |
+                        +--------------------+
+

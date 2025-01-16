@@ -156,10 +156,6 @@
           fun = x**3
       ELSE IF (degree .EQ. 4) THEN
           fun = x**4
-      ELSE IF (degree .EQ. 5) THEN
-          fun = x**5
-      ELSE IF (degree .EQ. 6) THEN
-          fun = x**6
       ELSE
           fun = 0.0  ! По умолчанию
       END IF

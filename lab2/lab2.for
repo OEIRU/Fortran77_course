@@ -1,102 +1,122 @@
       PROGRAM MAIN
-          IMPLICIT NONE
-          COMMON /INPUT/ X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
-          REAL*8 X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
+      IMPLICIT NONE
+      COMMON /INPUT/ X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
+      REAL*8 X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
 
-          CALL READ_PARAMS()
-          CALL CREATE_TABLE()
+      CALL READ_PARAMS()
+      CALL CREATE_TABLE()
       END
 
       SUBROUTINE READ_PARAMS()
-          IMPLICIT NONE
-          COMMON /INPUT/ X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
-          REAL*8 X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
+      IMPLICIT NONE
+      COMMON /INPUT/ X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
+      REAL*8 X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
 
-          OPEN(10, FILE='params.txt', STATUS='OLD', ERR=100)
-          READ(10, *, ERR=100) X_MIN, X_MAX
-          READ(10, *, ERR=100) Y_MIN, Y_MAX
-          READ(10, *, ERR=100) X_STEP, Y_STEP
-          CLOSE(10)
-          RETURN
+      OPEN(10, FILE='params.txt', STATUS='OLD', ERR=100)
+      READ(10, *, ERR=100) X_MIN, X_MAX
+      READ(10, *, ERR=100) Y_MIN, Y_MAX
+      READ(10, *, ERR=100) X_STEP, Y_STEP
+      CLOSE(10)
+      RETURN
 
-100       PRINT *, 'Error reading params file!'
-          STOP
+100   PRINT *, 'Error reading params file!'
+      STOP
       END
 
       REAL*8 FUNCTION TO_RAD(ANGLE)
-          IMPLICIT NONE
-          REAL*8 ANGLE
-          TO_RAD = ANGLE / 180.0D0 * 3.14159265358979323846D0
+      IMPLICIT NONE
+      REAL*8 ANGLE
+      TO_RAD = ANGLE / 180.0D0 * 3.14159265358979323846D0
       END
 
       REAL*8 FUNCTION ARCCOS(SUM)
-          IMPLICIT NONE
-          REAL*8 SUM
-          ARCCOS = ACOS(SUM)
+      IMPLICIT NONE
+      REAL*8 SUM
+      IF (SUM .LT. -1.0D0 .OR. SUM .GT. 1.0D0) THEN
+        ARCCOS = -1.0D0  ! Возвращаем специальное значение для обозначения ошибки
+      ELSE
+        ARCCOS = ACOS(SUM)
+      END IF
       END
 
       SUBROUTINE WRITE_ROW(X, Y_VALS, M)
-          IMPLICIT NONE
-          REAL*8 X, Y_VALS(*), ARCCOS, RES
-          INTEGER M, J
+      IMPLICIT NONE
+      REAL*8 X, Y_VALS(*), ARCCOS, RES
+      INTEGER M, J
+      CHARACTER*15 RES_STR  
+      EXTERNAL ARCCOS
 
-          WRITE(10, '(A, E15.8, A, $)') '| ', X, ' '
-          DO J = 1, M
-              RES = ARCCOS(X + Y_VALS(J))  ! Вычисляем значение и сохраняем в RES
-              WRITE(10, '(A, E15.8, A, $)') '| ', RES, ' '
-          END DO
-          WRITE(10, '(A)') '|'
+      WRITE(10, '(A, E15.8, A, $)') '| ', X, ' '
+      DO J = 1, M
+        RES = ARCCOS(X + Y_VALS(J))
+        IF (RES .EQ. -1.0D0) THEN
+            RES_STR = 'N/D           '  ! Записываем "N/D", если значение не определено
+        ELSE
+            WRITE(RES_STR, '(E15.8)') RES  ! Форматируем результат
+        END IF
+        WRITE(10, '(A, A, A, $)') '| ', RES_STR, ' '
+      END DO
+      WRITE(10, '(A)') '|'
       END
 
       SUBROUTINE CREATE_TABLE()
-          IMPLICIT NONE
-          COMMON /INPUT/ X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
-          REAL*8 X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
-          REAL*8 X, Y, Y_VALS(1000)
-          INTEGER N, M, I, J
+      IMPLICIT NONE
+      COMMON /INPUT/ X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
+      REAL*8 X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
+      REAL*8 X, Y_VALS(1000)
+      INTEGER N, M, I, J
 
-          ! Вычисление количества шагов
-          N = INT((X_MAX - X_MIN) / X_STEP) + 1
-          M = INT((Y_MAX - Y_MIN) / Y_STEP) + 1
+      ! Вычисление количества шагов
+      N = INT((X_MAX - X_MIN) / X_STEP) + 1
+      IF (X_MIN + (N - 1) * X_STEP .LT. X_MAX) N = N + 1
+      M = INT((Y_MAX - Y_MIN) / Y_STEP) + 1
+      IF (Y_MIN + (M - 1) * Y_STEP .LT. Y_MAX) M = M + 1
 
-          ! Заполнение массива Y_VALS
-          DO J = 1, M
-              Y_VALS(J) = Y_MIN + (J - 1) * Y_STEP
-          END DO
+      ! Проверка размера массива
+      IF (M .GT. 1000) THEN
+        PRINT *, 'Error: Y_VALS array size exceeded!'
+        STOP
+      END IF
 
-          ! Открытие файла для записи таблицы
-          OPEN(10, FILE='table.txt', STATUS='REPLACE', ERR=200)
+      ! Заполнение массива Y_VALS
+      DO J = 1, M
+        Y_VALS(J) = Y_MIN + (J - 1) * Y_STEP
+      END DO
 
-          ! Заголовок таблицы
-          WRITE(10, '(A, $)') '|       X/Y       '
-          DO J = 1, M
-              WRITE(10, '(A, E15.8, A, $)') '| ', Y_VALS(J), ' '
-          END DO
-          WRITE(10, '(A)') '|'
+    ! Открытие файла для записи таблицы
+      OPEN(10, FILE='table.txt', STATUS='UNKNOWN', ERR=200)
 
-          ! Разделительная линия
-          WRITE(10, '(A, $)') '+-----------------'
-          DO J = 1, M
-              WRITE(10, '(A, $)') '+-----------------'
-          END DO
-          WRITE(10, '(A)') '+'
+    ! Заголовок таблицы
+      WRITE(10, '(A, $)') '|       X/Y       '
+      DO J = 1, M
+        WRITE(10, '(A, E15.8, A, $)') '| ', Y_VALS(J), ' '
+      END DO
+      WRITE(10, '(A)') '|'
 
-          ! Заполнение таблицы
-          DO I = 1, N
-              X = X_MIN + (I - 1) * X_STEP
-              CALL WRITE_ROW(X, Y_VALS, M)
+    ! Разделительная линия
+      WRITE(10, '(A, $)') '+-----------------'
+      DO J = 1, M
+        WRITE(10, '(A, $)') '+-----------------'
+      END DO
+      WRITE(10, '(A)') '+'
 
-              ! Разделительная линия между строками
-              WRITE(10, '(A, $)') '+-----------------'
-              DO J = 1, M
-                  WRITE(10, '(A, $)') '+-----------------'
-              END DO
-              WRITE(10, '(A)') '+'
-          END DO
+    ! Заполнение таблицы
+      DO I = 1, N
+        X = X_MIN + (I - 1) * X_STEP
+        IF (I .EQ. N) X = X_MAX
+        CALL WRITE_ROW(X, Y_VALS, M)
 
-          CLOSE(10)
-          RETURN
+        ! Разделительная линия между строками
+        WRITE(10, '(A, $)') '+-----------------'
+        DO J = 1, M
+            WRITE(10, '(A, $)') '+-----------------'
+        END DO
+        WRITE(10, '(A)') '+'
+      END DO
 
-200       PRINT *, 'Error opening table file!'
-          STOP
+      CLOSE(10)
+      RETURN
+
+200   PRINT *, 'Error opening table file!'
+      STOP
       END

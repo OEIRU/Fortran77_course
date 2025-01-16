@@ -6,8 +6,8 @@
       DATA_FILE = 'data.txt'
       MATRIX_FILE = 'matrix.bin'
       VECTOR_FILE = 'vector.bin'
-      RESULT_FILE = 'result.txt'  ! Изменено на текстовый файл
-      
+      RESULT_FILE = 'result.txt'  
+   
       CALL READ_DATA(DATA_FILE, N, I1, I2)
       CALL READ_MATRIX(MATRIX_FILE, N, I1, I2, mem(1))          ! Матрица A
       CALL READ_VECTOR(VECTOR_FILE, N, mem(5*N + 1))            ! Вектор F
@@ -26,60 +26,72 @@
       WRITE(*, *) 'N =', N, 'I1 =', I1, 'I2 =', I2
       RETURN
       END
-      
+   
       SUBROUTINE READ_MATRIX(FILENAME, N, I1, I2, A)
       CHARACTER*20 FILENAME
       INTEGER N, I1, I2, I
       REAL A(5, N)  ! Матрица A хранится в первых 5*N элементах mem
-      OPEN(11, FILE=FILENAME, STATUS='OLD', ACCESS='STREAM')
-      READ(11) (A(1, I), I=1, N-I1)
-      READ(11) (A(2, I), I=1, N-1)
-      READ(11) (A(3, I), I=1, N)
-      READ(11) (A(4, I), I=1, N-1)
-      READ(11) (A(5, I), I=1, N-I2)
+      OPEN(11, FILE=FILENAME, STATUS='OLD', ACCESS='DIRECT', RECL=4)
+      DO I = 1, N - I1
+        READ(11, REC=I) A(1, I)
+      END DO
+      DO I = 1, N - 1
+        READ(11, REC=N - I1 + I) A(2, I)
+      END DO
+      DO I = 1, N
+        READ(11, REC=2*N - I1 - 1 + I) A(3, I)
+      END DO
+      DO I = 1, N - 1
+        READ(11, REC=3*N - I1 - 1 + I) A(4, I)
+      END DO
+      DO I = 1, N - I2
+        READ(11, REC=4*N - I1 - 2 + I) A(5, I)
+      END DO
       CLOSE(11)
       WRITE(*, *) 'Reading matrix from binary file:', FILENAME
       RETURN
       END
-      
+   
       SUBROUTINE READ_VECTOR(FILENAME, N, F)
       CHARACTER*20 FILENAME
       INTEGER N, I
       REAL F(N)  ! Вектор F хранится в следующих N элементах mem
-      OPEN(12, FILE=FILENAME, STATUS='OLD', ACCESS='STREAM')
-      READ(12) (F(I), I=1, N)
+      OPEN(12, FILE=FILENAME, STATUS='OLD', ACCESS='DIRECT', RECL=4)
+      DO I = 1, N
+        READ(12, REC=I) F(I)
+      END DO
       CLOSE(12)
       WRITE(*, *) 'Reading vector from binary file:', FILENAME
       RETURN
       END
-      
+   
       SUBROUTINE MULTIPLY_MATRIX_VECTOR(N, I1, I2, A, F, RESULT)
       INTEGER N, I1, I2, I
       REAL A(5, N), F(N), RESULT(N)
       DO 10 I = 1, N
          RESULT(I) = A(3, I) * F(I)
-   10 CONTINUE
+10    CONTINUE
       DO 20 I = 2, N
          RESULT(I) = RESULT(I) + A(2, I-1) * F(I-1)
-   20 CONTINUE
+20    CONTINUE
       DO 30 I = I1 + 1, N
          RESULT(I) = RESULT(I) + A(1, I-I1) * F(I-I1)
-   30 CONTINUE
+30    CONTINUE
       DO 40 I = 1, N - 1
          RESULT(I) = RESULT(I) + A(4, I) * F(I+1)
-   40 CONTINUE
+40    CONTINUE
       DO 50 I = 1, N - I2
          RESULT(I) = RESULT(I) + A(5, I) * F(I+I2)
-   50 CONTINUE
+50    CONTINUE
       WRITE(*, *) 'Multiplying matrix and vector'
       RETURN
       END
-      
+   
       SUBROUTINE WRITE_VECTOR(FILENAME, N, RESULT)
       CHARACTER*20 FILENAME
       INTEGER N, I
       REAL RESULT(N)  ! RESULT хранится в последних N элементах mem
-      OPEN(13, FILE=FILENAME, STATUS='REPLACE')  ! Открываем текстовый файл
+      OPEN(13, FILE=FILENAME, STATUS='UNKNOWN')  ! Открываем текстовый файл
       DO 200 I = 1, N
          WRITE(13, '(F12.6)') RESULT(I)  ! Записываем каждое число с форматированием
 200   CONTINUE
