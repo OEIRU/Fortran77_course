@@ -1,235 +1,133 @@
       PROGRAM MAIN
-      INTEGER N_SEGMENTS
-      REAL*8 A, B
-      EXTERNAL POLY_FUNC, OSC_FUNC
-      REAL*8 POLY_FUNC, OSC_FUNC  ! Явное объявление типа для функций
-      CHARACTER*20 METHOD_NAME, FUNC_NAME
+      IMPLICIT NONE
+      REAL*8 A, B, EXACT1, EXACT2
+      INTEGER TRAPEZOID, GAUSS4
+      PARAMETER (TRAPEZOID=1, GAUSS4=2)
+      PARAMETER (A=0.0D0, B=1.0D0)  ! Integration limits
 
-      ! Ввод значений A, B
-      PRINT *, 'Enter A:'
-      READ *, A
-      PRINT *, 'Enter B:'
-      READ *, B
+      ! Exact values of integrals
+      EXACT1 = 1.0D0 / 11.0D0        ! For x^10
+      EXACT2 = (COS(0.0D0) - COS(10.0D0)) / 10.0D0  ! For sin(10x)
 
-      ! Исследование для метода трапеций
-      METHOD_NAME = 'Trapezoid'
-      FUNC_NAME = 'Poly k+3'
-      N_SEGMENTS = 1  ! Начальное значение N для метода трапеций
-      CALL CONVERGENCE_TABLE(METHOD_NAME, 2, A, B, N_SEGMENTS, 
-     &                      POLY_FUNC, FUNC_NAME)
+      PRINT *, 'Testing x^5:'
+      CALL TEST_INTEGRATION(TRAPEZOID, A, B, EXACT1, 1)
+      CALL TEST_INTEGRATION(GAUSS4, A, B, EXACT1, 1)
 
-      FUNC_NAME = 'Oscillating'
-      N_SEGMENTS = 1  ! Начальное значение N для метода трапеций
-      CALL CONVERGENCE_TABLE(METHOD_NAME, 2, A, B, N_SEGMENTS, 
-     &                     OSC_FUNC, FUNC_NAME)
+      PRINT *, 'Testing sin(10x):'
+      CALL TEST_INTEGRATION(TRAPEZOID, A, B, EXACT2, 2)
+      CALL TEST_INTEGRATION(GAUSS4, A, B, EXACT2, 2)
 
-      ! Исследование для метода Гаусса-4
-      METHOD_NAME = 'Gauss-4'
-      FUNC_NAME = 'Poly k+3'
-      N_SEGMENTS = 1  ! Начальное значение N для метода Гаусса-4
-      CALL CONVERGENCE_TABLE(METHOD_NAME, 8, A, B, N_SEGMENTS, 
-     &                      POLY_FUNC, FUNC_NAME)
+      END PROGRAM MAIN
 
-      FUNC_NAME = 'Oscillating'
-      N_SEGMENTS = 4  ! Начальное значение N для метода Гаусса-4
-      CALL CONVERGENCE_TABLE(METHOD_NAME, 8, A, B, N_SEGMENTS, 
-     &                      OSC_FUNC, FUNC_NAME)
+      REAL*8 FUNCTION FUNC1(X)
+      IMPLICIT NONE
+      REAL*8 X
+      FUNC1 = X**10
+      RETURN
       END
 
+      REAL*8 FUNCTION FUNC2(X)
+      IMPLICIT NONE
+      REAL*8 X
+      FUNC2 = SIN(10.0D0 * X)
+      RETURN
+      END
 
-      ! Метод трапеций (без массива X)
-      SUBROUTINE TRAPEZOID_RULE(A, B, N, INTEGRAL, FUNC)
-      REAL*8 A, B, INTEGRAL, H, X
-      INTEGER I, N
-      REAL*8 FUNC
-      EXTERNAL FUNC
+      SUBROUTINE TEST_INTEGRATION(METHOD, A, B, EXACT, FUNC_SEL)
+      IMPLICIT NONE
+      INTEGER METHOD, FUNC_SEL
+      REAL*8 A, B, EXACT
+      INTEGER N, N_STEP, N_MAX, I
+      PARAMETER (N_MAX=40)  ! Maximum number of doublings (N = 2^24)
+      REAL*8 INTEGRAL, ERROR, PREV_ERROR, RATIO, ORDER
 
-      INTEGRAL = 0.0D0
+      PRINT *, '-----------------------------------------------'
+      IF (METHOD .EQ. 1) THEN
+          PRINT *, 'Trapezoid rule (order 2):'
+      ELSE IF (METHOD .EQ. 2) THEN
+          PRINT *, 'Gauss4 rule (order 8):'
+      END IF
+      PRINT *, '-----------------------------------------------'
+      PRINT *, '        N |     Integral |     Error  | Ratio  | Order'
+
+      PREV_ERROR = 0.0D0
+      DO I = 0, N_MAX
+          N = 2**I  ! N increases as powers of 2: 1, 2, 4, 8, ...
+          IF (METHOD .EQ. 1) THEN
+              CALL TRAPEZOID_RULE(A, B, N, INTEGRAL, FUNC_SEL)
+          ELSE IF (METHOD .EQ. 2) THEN
+              CALL GAUSS4_RULE(A, B, N, INTEGRAL, FUNC_SEL)
+          END IF
+
+          ERROR = ABS(INTEGRAL - EXACT)
+          IF (I .GT. 0) THEN
+              RATIO = PREV_ERROR / ERROR
+              ORDER = LOG(RATIO) / LOG(2.0D0)  ! Theoretical order
+          ELSE
+              RATIO = 0.0D0
+              ORDER = 0.0D0
+          END IF
+          PRINT '(I10, " | ", F12.8, " | ", E10.3, " | ", F5.2, " | "
+     &            , F5.2)',
+     &          N, INTEGRAL, ERROR, RATIO, ORDER
+
+          ! Stop if error stops decreasing for 3 steps
+          IF (I .GT. 3 .AND. ORDER .LT. 0.5) EXIT
+          PREV_ERROR = ERROR
+      END DO
+      PRINT *, '-----------------------------------------------'
+      END SUBROUTINE TEST_INTEGRATION
+
+      SUBROUTINE TRAPEZOID_RULE(A, B, N, INTEGRAL, FUNC_SEL)
+      IMPLICIT NONE
+      INTEGER N, FUNC_SEL
+      REAL*8 A, B, INTEGRAL, H, X, SUM
+      REAL*8 FUNC1, FUNC2
+      INTEGER I
+
       H = (B - A) / N
-      DO I = 0, N-1
-        X = A + I * H
-        INTEGRAL = INTEGRAL + (FUNC(X) + FUNC(X + H)) * H / 2.0D0
+      SUM = 0.0D0
+      DO I = 1, N-1
+          X = A + I * H
+          IF (FUNC_SEL .EQ. 1) THEN
+              SUM = SUM + FUNC1(X)
+          ELSE
+              SUM = SUM + FUNC2(X)
+          END IF
       END DO
+      IF (FUNC_SEL .EQ. 1) THEN
+          INTEGRAL = H * (0.5D0 * (FUNC1(A) + FUNC1(B)) + SUM)
+      ELSE
+          INTEGRAL = H * (0.5D0 * (FUNC2(A) + FUNC2(B)) + SUM)
+      END IF
+      RETURN
       END
 
+      SUBROUTINE GAUSS4_RULE(A, B, N, INTEGRAL, FUNC_SEL)
+      IMPLICIT NONE
+      INTEGER N, FUNC_SEL
+      REAL*8 A, B, INTEGRAL, H, X, SUM
+      REAL*8 WEIGHTS(4), NODES(4)
+      REAL*8 FUNC1, FUNC2
+      INTEGER I, J
 
-      ! Метод Гаусса-4 (без массива X)
-      SUBROUTINE GAUSS4_RULE(A, B, N, INTEGRAL, FUNC)
-      REAL*8 A, B, INTEGRAL, H, A_I, B_I, MID, T_J
-      REAL*8 W(4), XI(4)
-      INTEGER I, J, N
-      REAL*8 FUNC
-      EXTERNAL FUNC
+      DATA WEIGHTS /0.347854845137454D0, 0.652145154862546D0,
+     &              0.652145154862546D0, 0.347854845137454D0/
+      DATA NODES /-0.861136311594053D0, -0.339981043584856D0,
+     &             0.339981043584856D0, 0.861136311594053D0/
 
-      ! Веса и узлы для метода Гаусса-4
-      DATA W /0.3478548451D0, 0.6521451549D0, 
-     &       0.6521451549D0, 0.3478548451D0/
-      DATA XI /-0.8611363116D0, -0.3399810436D0, 
-     &       0.3399810436D0, 0.8611363116D0/
-
-      INTEGRAL = 0.0D0
-      H = (B - A) / N  ! Шаг разбиения
-
-      ! Цикл по подынтервалам
-      DO I = 0, N-1
-      A_I = A + I * H  ! Начало подынтервала
-      B_I = A_I + H    ! Конец подынтервала
-      MID = (A_I + B_I) / 2.0D0  ! Середина подынтервала
-
-      ! Цикл по узлам Гаусса-4
-      DO J = 1, 4
-        T_J = MID + (H / 2.0D0) * XI(J)  ! Масштабирование узла
-        INTEGRAL = INTEGRAL + W(J) * FUNC(T_J) * (H / 2.0D0)
+      H = (B - A) / N
+      SUM = 0.0D0
+      DO I = 1, N
+          DO J = 1, 4
+              X = A + (I - 1)*H + 0.5D0 * H * (1.0D0 + NODES(J))
+              IF (FUNC_SEL .EQ. 1) THEN
+                  SUM = SUM + WEIGHTS(J) * FUNC1(X)
+              ELSE
+                  SUM = SUM + WEIGHTS(J) * FUNC2(X)
+              END IF
+          END DO
       END DO
-      END DO
-      END
-
-
-      ! Функция для вычисления аналитического значения интеграла
-      REAL*8 FUNCTION ANALYTIC_INTEGRAL(A, B, FUNC_NAME)
-      REAL*8 A, B
-      CHARACTER*(*) FUNC_NAME
-      INTEGER IS_POLY, IS_OSC
-
-      ! Определяем, какая функция используется
-      IS_POLY = 0
-      IS_OSC = 0
-      IF (FUNC_NAME .EQ. 'Poly k+3') IS_POLY = 1
-      IF (FUNC_NAME .EQ. 'Oscillating') IS_OSC = 1
-
-      ! Проверка на корректность имени функции
-      IF (IS_POLY .EQ. 0 .AND. IS_OSC .EQ. 0) THEN
-        PRINT *, 'Error: Unknown function name.'
-        ANALYTIC_INTEGRAL = 0.0D0
-        RETURN
-      END IF
-
-      ! Вычисляем аналитическое значение интеграла
-      ANALYTIC_INTEGRAL = IS_POLY * (B**6 - A**6) / 6.0D0
-     &                 + IS_OSC * (-COS(10.0D0 * B) + COS(10.0D0 * A)) 
-     &                 / 10.0D0
-      END
-
-
-      ! Подпрограмма для исследования порядка аппроксимации
-      SUBROUTINE CONVERGENCE_TABLE(METHOD_NAME, K, A, B, N_SEGMENTS, 
-     &                            FUNC, FUNC_NAME)
-      CHARACTER*(*) METHOD_NAME, FUNC_NAME
-      INTEGER K, N_SEGMENTS
-      REAL*8 A, B
-      REAL*8 FUNC  ! Явное объявление типа для FUNC
-      EXTERNAL FUNC
-      REAL*8 INTEGRAL, ANALYTIC, ERROR, PREV_ERROR, MIN_ERROR
-      REAL*8 RUNGE_ERROR, RICHARDSON, RICHARDSON_ERROR
-      REAL*8 PREV_INTEGRAL, RATIO_ERROR, EST_RATIO_ERROR
-      INTEGER STEP, ITER_AFTER_MIN
-      INTEGER IS_TRAPEZOID, IS_GAUSS
-      LOGICAL FLAG_MIN
-      REAL*8 ANALYTIC_INTEGRAL  ! Явное объявление функции как REAL*8
-      INTEGER MAX_ITER
-      PARAMETER (MAX_ITER = 100)
-        
-      ! Определяем, какой метод используется
-      IS_TRAPEZOID = 0
-      IS_GAUSS = 0
-      IF (METHOD_NAME .EQ. 'Trapezoid') IS_TRAPEZOID = 1
-      IF (METHOD_NAME .EQ. 'Gauss-4') IS_GAUSS = 1
-
-      ANALYTIC = ANALYTIC_INTEGRAL(A, B, FUNC_NAME)
-      WRITE(*, *) 'Method: ', METHOD_NAME
-      WRITE(*, *) 'Order of method: ', K
-      WRITE(*, *) 'Function: ', FUNC_NAME
-      WRITE(*, *) 'Analytic: ', ANALYTIC
-      WRITE(*, *) '-------------------------------------------'
-
-      PREV_ERROR = 1.0E30  ! Большое начальное значение для первой итерации
-      PREV_INTEGRAL = 0.0D0
-      FLAG_MIN = .FALSE.   ! Флаг для минимальной ошибки
-      ITER_AFTER_MIN = 0   ! Счетчик итераций после достижения минимальной ошибки
-      MIN_ERROR = 1.0E30   ! Минимальная ошибка
-
-      STEP = 1
-      DO WHILE (N_SEGMENTS .LE. 1E9 .AND. STEP .LE. MAX_ITER)
-      ! Вычисление для N отрезков
-      IF (IS_TRAPEZOID .EQ. 1) THEN
-        CALL TRAPEZOID_RULE(A, B, N_SEGMENTS, INTEGRAL, FUNC)
-      ELSE IF (IS_GAUSS .EQ. 1) THEN
-        CALL GAUSS4_RULE(A, B, N_SEGMENTS, INTEGRAL, FUNC)
-      END IF
-      ERROR = ABS(ANALYTIC - INTEGRAL)
-
-      ! Отношение погрешностей
-      RATIO_ERROR = 0.0D0
-      EST_RATIO_ERROR = 0.0D0
-      IF (STEP .GT. 1 .AND. ERROR .GT. 1.0E-15) THEN
-        RATIO_ERROR = PREV_ERROR / ERROR
-        EST_RATIO_ERROR = 2.0D0**K
-      END IF
-
-      ! Оценка по правилу Рунге
-      RUNGE_ERROR = 0.0D0
-      IF (STEP .GT. 1) THEN
-        RUNGE_ERROR = (INTEGRAL - PREV_INTEGRAL) / (2**K - 1)
-      END IF
-
-      ! Уточнение по Ричардсону
-      RICHARDSON = 0.0D0
-      RICHARDSON_ERROR = 0.0D0
-      IF (STEP .GT. 1) THEN
-        RICHARDSON = INTEGRAL + (INTEGRAL - PREV_INTEGRAL) / 
-     &                  (2**K - 1)
-        RICHARDSON_ERROR = ABS(ANALYTIC - RICHARDSON)
-      END IF
-
-      ! Вывод данных для текущего N
-      WRITE(*, 100) 'N: ', N_SEGMENTS
-      !WRITE(*, 101) 'Numeric: ', INTEGRAL
-      !WRITE(*, 101) 'Ratio Error: ', RATIO_ERROR
-      !WRITE(*, 101) 'Estimated Ratio: ', EST_RATIO_ERROR
-      WRITE(*, 101) 'Error: ', ERROR
-      !WRITE(*, 101) 'Runge Error: ', RUNGE_ERROR
-      !WRITE(*, 101) 'Richardson: ', RICHARDSON
-      !WRITE(*, 101) 'Richardson Error: ', RICHARDSON_ERROR
-      !WRITE(*, *) '-------------------------------------------'
-
-100   FORMAT(A, I60)
-101   FORMAT(A, E30.15)
-
-      ! Проверка на минимальную ошибку
-      IF (.NOT. FLAG_MIN .AND. ERROR .LT. MIN_ERROR) THEN
-          MIN_ERROR = ERROR  ! Обновляем минимальную ошибку
-      END IF
-  
-      ! Если флаг активирован, увеличиваем счетчик
-      IF (.NOT. FLAG_MIN .AND. ERROR .GT. MIN_ERROR) THEN
-          FLAG_MIN = .TRUE.
-      END IF
-
-      ! Если флаг активирован, увеличиваем счетчик
-      IF (FLAG_MIN) THEN
-        ITER_AFTER_MIN = ITER_AFTER_MIN + 1
-      END IF
-  
-      ! Если выполнено 3 итерации после активации флага, завершаем цикл
-      IF (ITER_AFTER_MIN .GE. 3) THEN
-          EXIT
-      END IF
-      ! Обновление предыдущих значений
-      PREV_ERROR = ERROR
-      PREV_INTEGRAL = INTEGRAL
-      N_SEGMENTS = N_SEGMENTS * 2
-      STEP = STEP + 1
-      END DO
-      END
-
-      ! Полином степени k+3 (для k=2: x^5)
-      REAL*8 FUNCTION POLY_FUNC(X)
-      REAL*8 X
-      POLY_FUNC = X**5 
-      END
-
-      ! Осциллирующая функция (sin(10x))
-      REAL*8 FUNCTION OSC_FUNC(X)
-      REAL*8 X
-      OSC_FUNC = SIN(10.0D0 * X)
+      INTEGRAL = 0.5D0 * H * SUM
+      RETURN
       END
