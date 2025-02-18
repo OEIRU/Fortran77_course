@@ -1,0 +1,306 @@
+Method: Trapezoid
+Order of method:            2
+-------------------------------------------
+Degree:            1
+N:            1
+Analytic:        0.5000000
+Numeric:        0.5000000
+Error:        0.0000000
+Ratio:        0.0000000
+Runge Error:        0.0000000
+Richardson:        0.5000000
+Richardson Error:        0.0000000
+-------------------------------------------
+Degree:            2
+N:            1
+Analytic:        0.3333333
+Numeric:        0.5000000
+Error:        0.1666667
+Ratio:        0.2500000
+Runge Error:        0.0138889
+Richardson:        0.5416667
+Richardson Error:        0.2083333
+-------------------------------------------
+Degree:            2
+N:            2
+Analytic:        0.3333333
+Numeric:        0.3750000
+Error:        0.0416667
+Ratio:        0.2499998
+Runge Error:        0.0034722
+Richardson:        0.3854167
+Richardson Error:        0.0520833
+-------------------------------------------
+Degree:            3
+N:            1
+Analytic:        0.2500000
+Numeric:        0.5000000
+Error:        0.2500000
+Ratio:        0.2500000
+Runge Error:        0.0208333
+Richardson:        0.5625000
+Richardson Error:        0.3125000
+-------------------------------------------
+Degree:            3
+N:            2
+Analytic:        0.2500000
+Numeric:        0.3125000
+Error:        0.0625000
+Ratio:        0.2500000
+Runge Error:        0.0052083
+Richardson:        0.3281250
+Richardson Error:        0.0781250
+-------------------------------------------
+Degree:            4
+N:            1
+Analytic:        0.2000000
+Numeric:        0.5000000
+Error:        0.3000000
+Ratio:        0.2708333
+Runge Error:        0.0270833
+Richardson:        0.5729167
+Richardson Error:        0.3729167
+-------------------------------------------
+Degree:            4
+N:            2
+Analytic:        0.2000000
+Numeric:        0.2812500
+Error:        0.0812500
+Ratio:        0.2548077
+Runge Error:        0.0069010
+Richardson:        0.3014323
+Richardson Error:        0.1014323
+-------------------------------------------
+Degree:            7
+N:            1
+Analytic:        0.1250000
+Numeric:        0.5000000
+Error:        0.3750000
+Ratio:        0.3437500
+Runge Error:        0.0429688
+Richardson:        0.5820313
+Richardson Error:        0.4570313
+-------------------------------------------
+Degree:            7
+N:            2
+Analytic:        0.1250000
+Numeric:        0.2539063
+Error:        0.1289063
+Ratio:        0.2741477
+Runge Error:        0.0117798
+Richardson:        0.2850952
+Richardson Error:        0.1600952
+-------------------------------------------
+Degree:            8
+N:            1
+Analytic:        0.1111111
+Numeric:        0.5000000
+Error:        0.3888889
+Ratio:        0.3621652
+Runge Error:        0.0469473
+Richardson:        0.5826823
+Richardson Error:        0.4715712
+-------------------------------------------
+Degree:            8
+N:            2
+Analytic:        0.1111111
+Numeric:        0.2519531
+Error:        0.1408420
+Ratio:        0.2832783
+Runge Error:        0.0132992
+Richardson:        0.2856013
+Richardson Error:        0.1744902
+-------------------------------------------
+Degree:            9
+N:            1
+Analytic:        0.1000000
+Numeric:        0.5000000
+Error:        0.4000000
+Ratio:        0.3774414
+Runge Error:        0.0503255
+Richardson:        0.5830078
+Richardson Error:        0.4830078
+-------------------------------------------
+Degree:            9
+N:            2
+Analytic:        0.1000000
+Numeric:        0.2509766
+Error:        0.1509766
+Ratio:        0.2931608
+Runge Error:        0.0147535
+Richardson:        0.2865486
+Richardson Error:        0.1865486
+-------------------------------------------
+Degree:           10
+N:            1
+Analytic:        0.0909091
+Numeric:        0.5000000
+Error:        0.4090909
+Ratio:        0.3900824
+Runge Error:        0.0531931
+Richardson:        0.5831706
+Richardson Error:        0.4922615
+-------------------------------------------
+Degree:           10
+N:            2
+Analytic:        0.0909091
+Numeric:        0.2504883
+Error:        0.1595792
+Ratio:        0.3033833
+Runge Error:        0.0161379
+Richardson:        0.2875434
+Richardson Error:        0.1966344
+-------------------------------------------
+Method: Gauss-4
+Order of method:            8
+-------------------------------------------
+Degree:            1
+N:            1
+Analytic:        0.5000000
+Numeric:        0.5000000
+Error:        0.0000000
+Ratio:        0.0000000
+Runge Error:        0.0000000
+Richardson:        0.5000000
+Richardson Error:        0.0000000
+-------------------------------------------
+Degree:            2
+N:            1
+Analytic:        0.3333333
+Numeric:        0.3333333
+Error:        0.0000000
+Ratio:        0.0000000
+Runge Error:        0.0000000
+Richardson:        0.3333333
+Richardson Error:        0.0000000
+-------------------------------------------
+Degree:            2
+N:            2
+Analytic:        0.3333333
+Numeric:        0.3333333
+Error:        0.0000000
+Ratio:        0.0000000
+Runge Error:        0.0000000
+Richardson:        0.3333333
+Richardson Error:        0.0000000
+-------------------------------------------
+Degree:            3
+N:            1
+Analytic:        0.2500000
+Numeric:        0.2500000
+Error:        0.0000000
+Ratio:        0.0000000
+Runge Error:        0.0000000
+Richardson:        0.2500000
+Richardson Error:        0.0000000
+-------------------------------------------
+Degree:            3
+N:            2
+Analytic:        0.2500000
+Numeric:        0.2500000
+Error:        0.0000000
+Ratio:        0.0000000
+Runge Error:        0.0000000
+Richardson:        0.2500000
+Richardson Error:        0.0000000
+-------------------------------------------
+Degree:            4
+N:            1
+Analytic:        0.2000000
+Numeric:        0.2000000
+Error:   1.4901161E-008
+Ratio:        0.0000000
+Runge Error:        0.0000000
+Richardson:        0.2000000
+Richardson Error:   1.4901161E-008
+-------------------------------------------
+Degree:            4
+N:            2
+Analytic:        0.2000000
+Numeric:        0.2000000
+Error:        0.0000000
+Ratio:        0.0000000
+Runge Error:        0.0000000
+Richardson:        0.2000000
+Richardson Error:        0.0000000
+-------------------------------------------
+Degree:            7
+N:            1
+Analytic:        0.1250000
+Numeric:        0.1250000
+Error:        0.0000000
+Ratio:        0.0000000
+Runge Error:   1.1687186E-010
+Richardson:        0.1250000
+Richardson Error:        0.0000000
+-------------------------------------------
+Degree:            7
+N:            2
+Analytic:        0.1250000
+Numeric:        0.1250000
+Error:   2.9802322E-008
+Ratio:        0.2500000
+Runge Error:   2.9217965E-011
+Richardson:        0.1250000
+Richardson Error:   2.9802322E-008
+-------------------------------------------
+Degree:            8
+N:            1
+Analytic:        0.1111111
+Numeric:        0.1110884
+Error:   2.2672117E-005
+Ratio:        0.0032862
+Runge Error:   2.9217964E-010
+Richardson:        0.1110884
+Richardson Error:   2.2761524E-005
+-------------------------------------------
+Degree:            8
+N:            2
+Analytic:        0.1111111
+Numeric:        0.1111110
+Error:   7.4505806E-008
+Ratio:        0.0000000
+Runge Error:        0.0000000
+Richardson:        0.1111110
+Richardson Error:   7.4505806E-008
+-------------------------------------------
+Degree:            9
+N:            1
+Analytic:        0.1000000
+Numeric:        0.0998980
+Error:   1.0203570E-004
+Ratio:        0.0037240
+Runge Error:   1.4901161E-009
+Richardson:        0.0998976
+Richardson Error:   1.0243803E-004
+-------------------------------------------
+Degree:            9
+N:            2
+Analytic:        0.1000000
+Numeric:        0.0999996
+Error:   3.7997961E-007
+Ratio:        0.0000000
+Runge Error:        0.0000000
+Richardson:        0.0999996
+Richardson Error:   3.7997961E-007
+-------------------------------------------
+Degree:           10
+N:            1
+Analytic:        0.0909091
+Numeric:        0.0906414
+Error:   2.6769191E-004
+Ratio:        0.0046202
+Runge Error:   4.8501820E-009
+Richardson:        0.0906404
+Richardson Error:   2.6873499E-004
+-------------------------------------------
+Degree:           10
+N:            2
+Analytic:        0.0909091
+Numeric:        0.0909079
+Error:   1.2367964E-006
+Ratio:        0.0000000
+Runge Error:        0.0000000
+Richardson:        0.0909078
+Richardson Error:   1.2442470E-006
+-------------------------------------------
