@@ -30,28 +30,28 @@
       IMPLICIT NONE
       REAL*8 SUM
       IF (SUM .LT. -1.0D0 .OR. SUM .GT. 1.0D0) THEN
-        ARCCOS = -1.0D0  ! Возвращаем специальное значение для обозначения ошибки
+        ARCCOS = -1.0D0
       ELSE
         ARCCOS = ACOS(SUM)
       END IF
       END
 
-      SUBROUTINE WRITE_ROW(X, Y_VALS, M)
+      SUBROUTINE WRITE_ROW(CUR_X, Y_VALS, M)
       IMPLICIT NONE
-      REAL*8 X, Y_VALS(*), ARCCOS, RES
+      REAL*8 CUR_X, Y_VALS(*), ARCCOS, RES
       INTEGER M, J
-      CHARACTER*10 RES_STR  
+      CHARACTER*10 RES_STR
       EXTERNAL ARCCOS
-      WRITE(10, '(A, F10.4, A, $)') '| ', X, ' '
-      DO J = 1, M
-        RES = ARCCOS(X + Y_VALS(J))
+      WRITE(10, '(A, F10.4, A, $)') '| ', CUR_X, ' '
+      DO 10 J = 1, M
+        RES = ARCCOS(CUR_X + Y_VALS(J))
         IF (RES .EQ. -1.0D0) THEN
-            RES_STR = 'N/D     '  ! Записываем "N/D", если значение не определено
+            RES_STR = 'N/D     '
         ELSE
-            WRITE(RES_STR, '(F10.4)') RES  ! Форматируем результат
+            WRITE(RES_STR, '(F10.4)') RES
         END IF
         WRITE(10, '(A, A, A, $)') '| ', RES_STR, ' '
-      END DO
+10    CONTINUE
       WRITE(10, '(A)') '|'
       END
 
@@ -59,78 +59,70 @@
       IMPLICIT NONE
       COMMON /INPUT/ X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
       REAL*8 X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
-      REAL*8 X, Y_VALS(1000)
+      REAL*8 CUR_X, Y_VALS(1000)
       INTEGER N, M, I, J
       LOGICAL HAS_VALID_VALUE
 
-      ! Проверка корректности шагов
       IF (X_STEP .LE. 0.0D0 .OR. Y_STEP .LE. 0.0D0) THEN
         PRINT *, 'Error: Step must be positive!'
         STOP
       END IF
 
-      ! Вычисление количества шагов
       N = INT((X_MAX - X_MIN) / X_STEP) + 1
       IF (X_MIN + (N - 1) * X_STEP .LT. X_MAX) N = N + 1
       M = INT((Y_MAX - Y_MIN) / Y_STEP) + 1
       IF (Y_MIN + (M - 1) * Y_STEP .LT. Y_MAX) M = M + 1
 
-      ! Проверка размера массива
       IF (M .GT. 1000) THEN
         PRINT *, 'Error: Y_VALS array size exceeded!'
         STOP
       END IF
 
-      ! Проверка наличия допустимых значений
       HAS_VALID_VALUE = .FALSE.
-      DO I = 1, N
-        DO J = 1, M
-          IF (ABS(X_MIN + (I - 1) * X_STEP + Y_MIN + (J - 1) * Y_STEP) <= 1.0D0) THEN
-            HAS_VALID_VALUE = .TRUE.
-            EXIT
-          END IF
-        END DO
-        IF (HAS_VALID_VALUE) EXIT
-      END DO
+      DO 20 I = 1, N
+          DO 30 J = 1, M
+              IF (ABS(X_MIN + (I - 1) * X_STEP + Y_MIN +
+     & (J - 1) * Y_STEP) .LE. 1.0D0) THEN
+                  HAS_VALID_VALUE = .TRUE.
+                  GOTO 40
+              END IF
+30        CONTINUE
+40        CONTINUE
+20    CONTINUE
       IF (.NOT. HAS_VALID_VALUE) THEN
         PRINT *, 'Error: No valid values in the specified range!'
         STOP
       END IF
 
-      ! Заполнение массива Y_VALS
-      DO J = 1, M
-        Y_VALS(J) = Y_MIN + (J - 1) * Y_STEP
-      END DO
+      DO 50 J = 1, M
+          Y_VALS(J) = Y_MIN + (J - 1) * Y_STEP
+50    CONTINUE
 
-      ! Открытие файла для записи таблицы
       OPEN(10, FILE='table.txt', STATUS='UNKNOWN', ERR=200)
 
-      ! Заголовок таблицы
       WRITE(10, '(A, $)') '|       X/Y       '
-      DO J = 1, M
-        WRITE(10, '(A, F10.4, A, $)') '| ', Y_VALS(J), ' '
-      END DO
+      DO 60 J = 1, M
+          WRITE(10, '(A, F10.4, A, $)') '| ', Y_VALS(J), ' '
+60    CONTINUE
       WRITE(10, '(A)') '|'
 
-      ! Разделительная линия
       WRITE(10, '(A, $)') '+-------------'
-      DO J = 1, M
-        WRITE(10, '(A, $)') '+-------------'
-      END DO
+      DO 70 J = 1, M
+          WRITE(10, '(A, $)') '+-------------'
+70    CONTINUE
       WRITE(10, '(A)') '+'
 
-      ! Заполнение таблицы
-      DO I = 1, N
-        X = X_MIN + (I - 1) * X_STEP
-        IF (I .EQ. N) X = X_MAX
-        CALL WRITE_ROW(X, Y_VALS, M)
-        ! Разделительная линия между строками
-        WRITE(10, '(A, $)') '+-------------'
-        DO J = 1, M
+      DO 80 I = 1, N
+          CUR_X = X_MIN + (I - 1) * X_STEP
+          IF (I .EQ. N) CUR_X = X_MAX
+          CALL WRITE_ROW(CUR_X, Y_VALS, M)
+
           WRITE(10, '(A, $)') '+-------------'
-        END DO
-        WRITE(10, '(A)') '+'
-      END DO
+          DO 90 J = 1, M
+              WRITE(10, '(A, $)') '+-------------'
+90        CONTINUE
+          WRITE(10, '(A)') '+'
+80    CONTINUE
 
       CLOSE(10)
       RETURN
