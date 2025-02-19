@@ -80,14 +80,12 @@
 
       HAS_VALID_VALUE = .FALSE.
       DO 20 I = 1, N
-          DO 30 J = 1, M
+          DO 20 J = 1, M
               IF (ABS(X_MIN + (I - 1) * X_STEP + Y_MIN +
      & (J - 1) * Y_STEP) .LE. 1.0D0) THEN
                   HAS_VALID_VALUE = .TRUE.
-                  GOTO 40
+                  GOTO 20
               END IF
-30        CONTINUE
-40        CONTINUE
 20    CONTINUE
       IF (.NOT. HAS_VALID_VALUE) THEN
         PRINT *, 'Error: No valid values in the specified range!'
