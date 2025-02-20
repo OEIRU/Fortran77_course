@@ -11,7 +11,7 @@
       PRINT *, 'Choose integration method: 1 for Trapez, 2 for Gauss'
       READ *, METHOD
       A = 0.0D0
-      B = 10.0D0
+      B = 1.0D0
       MAX_STEPS = 25
       ANALYTIC_VAL = ANALYTIC_VALUE(A, B)
       PRINT *, 'Number of segments Numerical value'
@@ -70,11 +70,14 @@
       REAL*8 FUNCTION F(X)
       REAL*8 X
       F = X**5
+      F = DSIN(10* X)
       END
 
       REAL*8 FUNCTION ANALYTIC_VALUE(A, B)
       REAL*8 A, B
-      ANALYTIC_VALUE = (B**6 - A**6) / 6.0D0
+      !ANALYTIC_VALUE = (B**6 - A**6) / 6.0D0
+      ANALYTIC_VALUE = (-DCOS(10.0D0 * B) / 10.0D0) +
+     & (DCOS(10.0D0 * A) / 10.0D0)
       END
 
       SUBROUTINE CREATE_GRID(A, B, N, H)

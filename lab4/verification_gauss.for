@@ -7,12 +7,10 @@
       REAL*8 ANALYTIC_VALUE
       REAL*8 GAUSS_QUADRATURE_METHOD
 
-C Define interval and function
       A = 0.0D0
       B = 1.0D0
       MAX_DEGREE = 10
 
-C Print table header
       PRINT *, 'Degree N Analytic Numeric Error'
       PRINT *, 'Ratio Runge Error Richardson Richardson Error'
 

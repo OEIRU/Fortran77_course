@@ -11,7 +11,7 @@
       PRINT *, 'Choose integration method: 1 for Trapez, 2 for Gauss'
       READ *, METHOD
       A = 0.0 
-      B = 10.0 
+      B = 1.0 
       MAX_STEPS = 20 
       ANALYTIC_VAL = ANALYTIC_VALUE(A, B)
       PRINT *, 'Number of segments Numerical value'
@@ -41,7 +41,7 @@
          IF (METHOD .EQ. 1) THEN
           RUNGE_ERROR = ABS(CURRENT_INTEGRAL - PREV_INTEGRAL) / 3.0 
           ELSE IF (METHOD .EQ. 2) THEN
-            RUNGE_ERROR = ABS(CURRENT_INTEGRAL - PREV_INTEGRAL) / 255.0 
+          RUNGE_ERROR = ABS(CURRENT_INTEGRAL - PREV_INTEGRAL) / 255.0 
          END IF
          RICHARDSON_CORRECTION = CURRENT_INTEGRAL + RUNGE_ERROR
          ELSE
@@ -52,7 +52,6 @@
 
          CORRECTED_ERROR = ABS(RICHARDSON_CORRECTION - ANALYTIC_VAL)
 
-C Formatted output
     1 FORMAT(I10, E15.8, E15.8, E15.8, E15.8, E15.8, E15.8)
          PRINT 1, NUM_SEGMENTS, CURRENT_INTEGRAL,
      &        ERROR, RUNGE_ERROR,
@@ -67,12 +66,16 @@ C Formatted output
 
       REAL FUNCTION F(X)
       REAL X
-      F = X**5
+      !F = X**5
+       F = SIN(10*X)
       END
 
       REAL FUNCTION ANALYTIC_VALUE(A, B)
       REAL A, B
-      ANALYTIC_VALUE = (B**6 - A**6) / 6.0 
+      !ANALYTIC_VALUE = (B**6 - A**6) / 6.0
+
+      ANALYTIC_VALUE = (-DCOS(10.0D0 * B) / 10.0D0) +
+     &                 (DCOS(10.0D0 * A) / 10.0D0)
       END
 
       SUBROUTINE CREATE_GRID(A, B, N, H)
