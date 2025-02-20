@@ -1,0 +1,81 @@
+      PROGRAM TRAPEZOIDAL_TABLE
+      REAL*8 A, B, ANALYTIC_VAL, CURRENT_INTEGRAL
+      REAL*8 PREV_INTEGRAL, RUNGE_ERROR, RICHARDSON_CORRECTION
+      REAL*8 ERROR, PREV_ERROR, RUNGE_RATIO, CORRECTED_ERROR, H
+      INTEGER MAX_DEGREE, N, DEGREE
+      EXTERNAL F
+      REAL*8 ANALYTIC_VALUE
+      REAL*8 TRAPEZOIDAL_METHOD
+
+C Define interval and function
+      A = 0.0D0
+      B = 1.0D0
+      MAX_DEGREE = 4
+
+C Print table header
+      PRINT *, 'Degree N Analytic Numeric Error'
+      PRINT *, 'Ratio Runge Error Richardson Richardson Error'
+
+      DO DEGREE = 1, MAX_DEGREE
+         ANALYTIC_VAL = ANALYTIC_VALUE(A, B, DEGREE)
+         PREV_INTEGRAL = 0.0D0
+         PREV_ERROR = 0.0D0
+
+         DO N = 1, 2
+            CALL CREATE_GRID(A, B, N, H)
+            CURRENT_INTEGRAL = TRAPEZOIDAL_METHOD(F, A, B, N, H, DEGREE)
+
+            ERROR = ABS(ANALYTIC_VAL - CURRENT_INTEGRAL)
+            IF (N .GT. 1 .AND. PREV_ERROR .NE. 0.0D0) THEN
+             RUNGE_RATIO = ERROR / PREV_ERROR
+             RUNGE_ERROR = ABS(CURRENT_INTEGRAL - PREV_INTEGRAL) / 3.0D0
+             RICHARDSON_CORRECTION = CURRENT_INTEGRAL + RUNGE_ERROR
+             CORRECTED_ERROR = ABS(RICHARDSON_CORRECTION - ANALYTIC_VAL)
+            ELSE
+               RUNGE_RATIO = 0.0D0
+               RUNGE_ERROR = 0.0D0
+               RICHARDSON_CORRECTION = CURRENT_INTEGRAL
+               CORRECTED_ERROR = ERROR
+            END IF
+
+C Formatted output
+    1 FORMAT(I2, I2, E15.8, E15.8, E15.8, E15.8, E15.8, E15.8, E15.8)
+            PRINT 1, DEGREE, N, ANALYTIC_VAL, CURRENT_INTEGRAL,
+     &        ERROR, RUNGE_RATIO, RUNGE_ERROR,
+     &        RICHARDSON_CORRECTION, CORRECTED_ERROR
+
+            PREV_INTEGRAL = CURRENT_INTEGRAL
+            PREV_ERROR = ERROR
+         END DO
+      END DO
+      END
+
+      REAL*8 FUNCTION F(X, DEGREE)
+      REAL*8 X
+      INTEGER DEGREE
+      F = X**DEGREE
+      END
+
+      REAL*8 FUNCTION ANALYTIC_VALUE(A, B, DEGREE)
+      REAL*8 A, B
+      INTEGER DEGREE
+      ANALYTIC_VALUE = (B**(DEGREE+1) - A**(DEGREE+1)) / DBLE(DEGREE+1)
+      END
+
+      SUBROUTINE CREATE_GRID(A, B, N, H)
+      REAL*8 A, B, H
+      INTEGER N
+      H = (B - A) / DBLE(N)
+      END
+
+      REAL*8 FUNCTION TRAPEZOIDAL_METHOD(FUNC, A, B, N, H, DEGREE)
+      REAL*8 FUNC, A, B, H, RESULT, X
+      INTEGER N, I, DEGREE
+      EXTERNAL FUNC
+      RESULT = 0.5D0 * (FUNC(A, DEGREE) + FUNC(B, DEGREE))
+      DO I = 1, N-1
+         X = A + DBLE(I) * H
+         RESULT = RESULT + FUNC(X, DEGREE)
+      END DO
+      TRAPEZOIDAL_METHOD = RESULT * H
+      END
