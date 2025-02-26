@@ -7,12 +7,10 @@
       REAL*8 ANALYTIC_VALUE
       REAL*8 TRAPEZOIDAL_METHOD
 
-C Define interval and function
       A = 0.0D0
       B = 1.0D0
       MAX_DEGREE = 4
 
-C Print table header
       PRINT *, 'Degree N Analytic Numeric Error'
       PRINT *, 'Ratio Runge Error Richardson Richardson Error'
 
@@ -38,7 +36,6 @@ C Print table header
                CORRECTED_ERROR = ERROR
             END IF
 
-C Formatted output
     1 FORMAT(I2, I2, E15.8, E15.8, E15.8, E15.8, E15.8, E15.8, E15.8)
             PRINT 1, DEGREE, N, ANALYTIC_VAL, CURRENT_INTEGRAL,
      &        ERROR, RUNGE_RATIO, RUNGE_ERROR,

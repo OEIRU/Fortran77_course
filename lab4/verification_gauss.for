@@ -5,7 +5,7 @@
       INTEGER MAX_DEGREE, N, DEGREE
       EXTERNAL F
       REAL*8 ANALYTIC_VALUE
-      REAL*8 GAUSS_QUADRATURE_METHOD
+      REAL*8 GAUSS_METHOD
 
       A = 0.0D0
       B = 1.0D0
@@ -21,7 +21,7 @@
 
          DO N = 1, 2
           CALL CREATE_GRID(A, B, N, H)
-          CURRENT_INTEGRAL = GAUSS_QUADRATURE_METHOD(F, A, B, N, DEGREE)
+          CURRENT_INTEGRAL = GAUSS_METHOD(F, A, B, N, DEGREE, H)
 
             ERROR = ABS(ANALYTIC_VAL - CURRENT_INTEGRAL)
             IF (N .GT. 1 .AND. PREV_ERROR .NE. 0.0D0) THEN
@@ -66,7 +66,7 @@ C Formatted output
       H = (B - A) / DBLE(N)
       END
 
-      REAL*8 FUNCTION GAUSS_QUADRATURE_METHOD(FUNC, A, B, N, DEGREE)
+      REAL*8 FUNCTION GAUSS_METHOD(FUNC, A, B, N, DEGREE, H)
       REAL*8 FUNC, A, B, H, SUM
       INTEGER N, I, DEGREE
       EXTERNAL FUNC
@@ -77,13 +77,12 @@ C Formatted output
       DATA W /0.3478547486D0, 0.6521451549D0,
      &  0.6521451549D0, 0.3478547486D0/
 
-      H = (B - A) / DBLE(N)
       SUM = 0.0D0
       DO I = 1, N
          SUM = SUM + GAUSS_SUM(FUNC, A + 
      & (DBLE(I)-1.0D0)*H, A + DBLE(I)*H, X, W, DEGREE)
       END DO
-      GAUSS_QUADRATURE_METHOD = SUM
+      GAUSS_METHOD = SUM
       END
 
       REAL*8 FUNCTION GAUSS_SUM(FUNC, A, B, X, W, DEGREE)

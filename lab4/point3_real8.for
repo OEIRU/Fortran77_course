@@ -6,17 +6,17 @@
       EXTERNAL F
       REAL*8 ANALYTIC_VALUE
       REAL*8 TRAPEZOIDAL_METHOD
-      REAL*8 GAUSS_QUADRATURE_METHOD
+      REAL*8 GAUSS_METHOD
 
       PRINT *, 'Choose integration method: 1 for Trapez, 2 for Gauss'
       READ *, METHOD
       A = 0.0D0
       B = 1.0D0
-      MAX_STEPS = 25
+      MAX_STEPS = 27
       ANALYTIC_VAL = ANALYTIC_VALUE(A, B)
-      PRINT *, 'Number of segments Numerical value'
-      PRINT *, 'Error ratio Error'
-      PRINT *, 'Runge estimate Richardson correction'
+      PRINT *, 'Number of segments \\ Numerical value'
+      PRINT *, 'Error'
+      PRINT *, 'Runge estimate \\ Richardson correction'
       PRINT *, 'Error of corrected solution'
 
       PREV_INTEGRAL = 0.0D0
@@ -29,7 +29,7 @@
          IF (METHOD .EQ. 1) THEN
         CURRENT_INTEGRAL = TRAPEZOIDAL_METHOD(F, A, B, NUM_SEGMENTS, H)
          ELSE IF (METHOD .EQ. 2) THEN
-      CURRENT_INTEGRAL = GAUSS_QUADRATURE_METHOD(F, A, B, NUM_SEGMENTS)
+      CURRENT_INTEGRAL = GAUSS_METHOD(F, A, B, NUM_SEGMENTS, H)
          ELSE
         PRINT *, 'Invalid method selected. Using Trapezoidal method.'
         CURRENT_INTEGRAL = TRAPEZOIDAL_METHOD(F, A, B, NUM_SEGMENTS, H)
@@ -70,14 +70,14 @@
       REAL*8 FUNCTION F(X)
       REAL*8 X
       F = X**5
-      F = DSIN(10* X)
+      !F = DSIN(10* X)
       END
 
       REAL*8 FUNCTION ANALYTIC_VALUE(A, B)
       REAL*8 A, B
-      !ANALYTIC_VALUE = (B**6 - A**6) / 6.0D0
-      ANALYTIC_VALUE = (-DCOS(10.0D0 * B) / 10.0D0) +
-     & (DCOS(10.0D0 * A) / 10.0D0)
+      ANALYTIC_VALUE = (B**6 - A**6) / 6.0D0
+      !ANALYTIC_VALUE = (-DCOS(10.0D0 * B) / 10.0D0) +
+     !!!& (DCOS(10.0D0 * A) / 10.0D0)
       END
 
       SUBROUTINE CREATE_GRID(A, B, N, H)
@@ -98,7 +98,7 @@
       TRAPEZOIDAL_METHOD = RESULT * H
       END
 
-      REAL*8 FUNCTION GAUSS_QUADRATURE_METHOD(FUNC, A, B, N)
+      REAL*8 FUNCTION GAUSS_METHOD(FUNC, A, B, N, H)
       REAL*8 FUNC, A, B, H, SUM
       INTEGER N, I
       EXTERNAL FUNC
@@ -109,13 +109,12 @@
       DATA W /0.3478547486D0, 0.6521451549D0,
      &  0.6521451549D0, 0.3478547486D0/
 
-      H = (B - A) / DBLE(N)
       SUM = 0.0D0
       DO I = 1, N
       SUM = SUM + GAUSS_SUM(FUNC, A + 
      & (DBLE(I)-1.0D0)*H, A + DBLE(I)*H, X, W)
       END DO
-      GAUSS_QUADRATURE_METHOD = SUM
+      GAUSS_METHOD = SUM
       END
 
       REAL*8 FUNCTION GAUSS_SUM(FUNC, A, B, X, W)
