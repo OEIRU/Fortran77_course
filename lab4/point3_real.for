@@ -11,12 +11,12 @@
       PRINT *, 'Choose integration method: 1 for Trapez, 2 for Gauss'
       READ *, METHOD
       A = 0.0 
-      B = 1.0 
+      B = 100.0 
       MAX_STEPS = 20 
       ANALYTIC_VAL = ANALYTIC_VALUE(A, B)
-      PRINT *, 'Number of segments Numerical value'
-      PRINT *, 'Error ratio Error'
-      PRINT *, 'Runge estimate Richardson correction'
+      PRINT *, 'Number of segments \\ Numerical value'
+      PRINT *, 'Error'
+      PRINT *, 'Runge estimate \\ Richardson correction'
       PRINT *, 'Error of corrected solution'
 
       PREV_INTEGRAL = 0.0 
@@ -102,10 +102,10 @@
       INTEGER N, I
       EXTERNAL FUNC
       REAL X(4), W(4)
-      DATA X /-0.8611363116, -0.3399810436,
-     &  0.3399810436, 0.8611363116/
-      DATA W /0.3478547486, 0.6521451549,
-     &  0.6521451549, 0.3478547486/
+      DATA X /-0.8611363, -0.3399810,
+     &  0.3399810, 0.8611363/
+      DATA W /0.3478547, 0.6521451,
+     &  0.6521451, 0.3478547/
 
       !H = (B - A) / REAL(N)
       SUM = 0.0 

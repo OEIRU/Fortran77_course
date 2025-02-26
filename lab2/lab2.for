@@ -17,6 +17,13 @@
       READ(10, *, ERR=100) Y_MIN, Y_MAX
       READ(10, *, ERR=100) X_STEP, Y_STEP
       CLOSE(10)
+
+      IF (ABS(X_STEP/X_MIN) .LT. 1.0E-4 .OR. 
+     & ABS(Y_STEP/Y_MIN) .LT. 1.0E-4 ) THEN
+        PRINT *, 'Error: Small step!'
+        STOP
+      END IF
+      
       RETURN
 100   PRINT *, 'Error reading params file!'
       STOP
