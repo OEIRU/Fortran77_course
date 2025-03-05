@@ -18,8 +18,8 @@
       READ(10, *, ERR=100) X_STEP, Y_STEP
       CLOSE(10)
 
-      IF (ABS(X_STEP/X_MIN) .LT. 1.0E-4 .OR. 
-     & ABS(Y_STEP/Y_MIN) .LT. 1.0E-4 ) THEN
+      IF (ABS(X_STEP/X_MIN) .LT. 0.00009 .OR. 
+     & ABS(Y_STEP/Y_MIN) .LT. 0.00009 ) THEN
         PRINT *, 'Error: Small step!'
         STOP
       END IF
@@ -44,17 +44,10 @@
       SUBROUTINE GET_FORMAT(NUMBER, FMT)
       IMPLICIT NONE
       REAL*8 NUMBER
-      INTEGER EXPONENT, DECIMAL_PLACES
       CHARACTER*20 FMT
 
-      IF (NUMBER .NE. 0.0D0) THEN
-          EXPONENT = LOG10(ABS(NUMBER)) 
-      ELSE
-          EXPONENT = 0
-      END IF
-
-      DECIMAL_PLACES = MAX(4 - EXPONENT - 1, 0)
-      WRITE(FMT, '(A, I2, A)') '(F20.', DECIMAL_PLACES, ')' 
+      ! Используем экспоненциальный формат с 4 значащими цифрами
+      WRITE(FMT, '(A)') '(ES12.3)'
       END
 
       SUBROUTINE NUMBER_TO_STRING(NUMBER, FMT, STR)
