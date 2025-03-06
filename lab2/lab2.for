@@ -39,9 +39,9 @@
       END IF
       END
 
-      SUBROUTINE WRITE_ROW(CUR_X, Y_VALS, M)
+      SUBROUTINE WRITE_ROW(CUR_X, Y_VALS, M, PREV_ARCCOS)
       IMPLICIT NONE
-      REAL*8 CUR_X, Y_VALS(*), ARCCOS, RES
+      REAL*8 CUR_X, Y_VALS(*), ARCCOS, RES, PREV_ARCCOS(*)
       INTEGER M, J
       CHARACTER*11 RES_STR
       EXTERNAL ARCCOS
@@ -53,8 +53,16 @@
       DO 10 J = 1, M
           RES = ARCCOS(CUR_X + Y_VALS(J))
           IF (RES .EQ. -1.0D0) THEN
-              RES_STR = 'N/D       '  ! Специальное значение для ошибок
+              RES_STR = 'N/D       '
           ELSE
+              ! Проверка на дублирование значений
+              IF (PREV_ARCCOS(J) .NE. -1.0D0 .AND.
+     &            ABS(RES - PREV_ARCCOS(J)) .LT. 1.0D-6) THEN
+                  PRINT *, 'Error: Duplicate ARCCOS value at X=', 
+     & CUR_X, ' Y=', Y_VALS(J)  
+                  STOP
+              END IF
+              PREV_ARCCOS(J) = RES
               CALL FORMAT_NUMBER(RES, RES_STR)
           END IF
           WRITE(10, '(A, A, A, $)') '| ', RES_STR, ' '
@@ -88,7 +96,7 @@
       IMPLICIT NONE
       COMMON /INPUT/ X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
       REAL*8 X_MAX, Y_MAX, X_MIN, Y_MIN, X_STEP, Y_STEP
-      REAL*8 CUR_X, Y_VALS(2000)  ! Увеличиваем размер массива
+      REAL*8 CUR_X, Y_VALS(2000), PREV_ARCCOS(2000)
       INTEGER N, M, I, J
       LOGICAL HAS_VALID_VALUE
       CHARACTER*11 RES_STR
@@ -125,9 +133,10 @@
         STOP
       END IF
 
-      ! Заполнение массива Y_VALS
+      ! Заполнение массива Y_VALS и инициализация PREV_ARCCOS
       DO 50 J = 1, M
           Y_VALS(J) = Y_MIN + (J - 1) * Y_STEP
+          PREV_ARCCOS(J) = -1.0D0  ! Инициализация массива предыдущих значений
 50    CONTINUE
 
       ! Открытие файла для записи таблицы
@@ -152,7 +161,7 @@
       DO 80 I = 1, N
           CUR_X = X_MIN + (I - 1) * X_STEP
           IF (I .EQ. N) CUR_X = X_MAX
-          CALL WRITE_ROW(CUR_X, Y_VALS, M)
+          CALL WRITE_ROW(CUR_X, Y_VALS, M, PREV_ARCCOS)
 
           WRITE(10, '(A, $)') '+-------------'
           DO 90 J = 1, M
