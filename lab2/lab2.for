@@ -16,9 +16,9 @@
       READ(10, *, ERR=100) X_STEP, Y_STEP
       CLOSE(10)
 
-      IF (ABS(X_STEP/X_MIN) .LT. 0.00009 .OR.
-     & ABS(Y_STEP/Y_MIN) .LT. 0.00009 ) THEN
-        PRINT *, 'Error: Small step!'
+      IF (ABS(X_STEP/X_MIN) .LT. 0.00009 .OR. ! Очень сомнительная 
+     & ABS(Y_STEP/Y_MIN) .LT. 0.00009 ) THEN  ! проверка, не нужна. 
+        PRINT *, 'Error: Small step!'         ! вывод оставить... 
         STOP
       END IF
 
@@ -57,7 +57,7 @@
           ELSE
               ! Проверка на дублирование значений
               IF (PREV_ARCCOS(J) .NE. -1.0D0 .AND.
-     &            ABS(RES - PREV_ARCCOS(J)) .LT. 1.0D-6) THEN
+     &            ABS(RES - PREV_ARCCOS(J)) .LT. 1.0D-3) THEN
                   PRINT *, 'Error: Duplicate ARCCOS value at X=', 
      & CUR_X, ' Y=', Y_VALS(J)  
                   STOP

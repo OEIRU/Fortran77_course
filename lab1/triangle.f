@@ -1,5 +1,5 @@
       PROGRAM MAIN
-      ! é°ÍÔ¢´•≠®• Æ°È®Â °´Æ™Æ¢ §´Ô Æ°¨•≠† §†≠≠Î¨® ¨•¶§„ ØÆ§Ø‡Æ£‡†¨¨†¨®.
+      ! –û–±—ä—è–≤–ª–µ–Ω–∏–µ –æ–±—â–∏—Ö –±–ª–æ–∫–æ–≤ –¥–ª—è –æ–±–º–µ–Ω–∞ –¥–∞–Ω–Ω—ã–º–∏ –º–µ–∂–¥—É –ø–æ–¥–ø—Ä–æ–≥—Ä–∞–º–º–∞–º–∏.
       COMMON /angles/ alpha, beta, gamma
       COMMON /side/ a, b, c
       COMMON /shared/ S, pi
@@ -7,9 +7,9 @@
       REAL minAngle, minCos
       pi = 3.14159265
       DO WHILE (i .NE. 5)
-      CALL menu()      ! ÇÎßÆ¢ ØÆ§Ø‡Æ£‡†¨¨Î §´Ô ¢Î¢Æ§† ¨•≠Ó
-      CALL input(i)    ! ÇÎßÆ¢ ØÆ§Ø‡Æ£‡†¨¨Î §´Ô ¢Î¢Æ§† ¢Î°Æ‡† ØÆ´ÏßÆ¢†‚•´Ô
-      SELECT CASE (i)  ! éØ‡•§•´•≠®• ÆØ•‡†Ê®© switch
+      CALL menu()      ! –í—ã–∑–æ–≤ –ø–æ–¥–ø—Ä–æ–≥—Ä–∞–º–º—ã –¥–ª—è –≤—ã–≤–æ–¥–∞ –º–µ–Ω—é
+      CALL input(i)    ! –í—ã–∑–æ–≤ –ø–æ–¥–ø—Ä–æ–≥—Ä–∞–º–º—ã –¥–ª—è –≤—ã–≤–æ–¥–∞ –≤—ã–±–æ—Ä–∞ –ø–æ–ª—å–∑–æ–≤–∞—Ç–µ–ª—è
+      SELECT CASE (i)  ! –û–ø—Ä–µ–¥–µ–ª–µ–Ω–∏–µ –æ–ø–µ—Ä–∞—Ü–∏–π switch
       
       CASE (1)
       CALL setData()
@@ -18,19 +18,19 @@
 c      IF (a.LT.b+c .AND. b.LT.a+c .AND. c.LT.a+b) THEN
       CALL calculateS()
       ELSE
-      PRINT *, 'Ñ†≠≠†Ô ‰®£„‡† ≠• ¨Æ¶•‚ °Î‚Ï ‚‡•„£Æ´Ï≠®™Æ¨.'
+      PRINT *, '–î–∞–Ω–Ω–∞—è —Ñ–∏–≥—É—Ä–∞ –Ω–µ –º–æ–∂–µ—Ç –±—ã—Ç—å —Ç—Ä–µ—É–≥–æ–ª—å–Ω–∏–∫–æ–º.'
       END IF
 
       CASE (2)
       CALL output('S = ', S)
       
       CASE (3)
-      CALL output('å®≠®¨†´Ï≠Î© „£Æ´ = ', minAngle())
+      CALL output('–ú–∏–Ω–∏–º–∞–ª—å–Ω—ã–π —É–≥–æ–ª = ', minAngle())
       
       CASE (4)
       CALL output('Min cos = ', minCos())
       CASE ( : 0, 6 : )
-      PRINT *, 'ç•¢•‡≠Î© ¢¢Æ§.'
+      PRINT *, '–ù–µ–≤–µ—Ä–Ω—ã–π –≤–≤–æ–¥.'
       END SELECT
       PRINT *, ' '
       END DO
@@ -38,18 +38,18 @@ c      IF (a.LT.b+c .AND. b.LT.a+c .AND. c.LT.a+b) THEN
       END
 
       SUBROUTINE menu()
-      PRINT *, 'ÇÎ°•‡®‚• Ø„≠™‚:'
-      PRINT *, '1. Ç¢Æ§ ≠Æ¢Æ£Æ ‚‡•„£Æ´Ï≠®™†.'
-      PRINT *, '2. ÇÎÁ®·´®‚Ï Ø´ÆÈ†§Ï ‚‡•„£Æ´Ï≠®™†.'
-      PRINT *, '3. å®≠®¨†´Ï≠Î© „£Æ´ ¢ £‡†§„·†Â.'
-      PRINT *, '4. äÆ·®≠„· ¨®≠®¨†´Ï≠Æ£Æ „£´†.'
-      PRINT *, '5. ÇÎÂÆ§.'
+      PRINT *, '–í—ã–±–µ—Ä–∏—Ç–µ –ø—É–Ω–∫—Ç:'
+      PRINT *, '1. –í–≤–æ–¥ –Ω–æ–≤–æ–≥–æ —Ç—Ä–µ—É–≥–æ–ª—å–Ω–∏–∫–∞.'
+      PRINT *, '2. –í—ã—á–∏—Å–ª–∏—Ç—å –ø–ª–æ—â–∞–¥—å —Ç—Ä–µ—É–≥–æ–ª—å–Ω–∏–∫–∞.'
+      PRINT *, '3. –ú–∏–Ω–∏–º–∞–ª—å–Ω—ã–π —É–≥–æ–ª –≤ –≥—Ä–∞–¥—É—Å–∞—Ö.'
+      PRINT *, '4. –ö–æ—Å–∏–Ω—É—Å –º–∏–Ω–∏–º–∞–ª—å–Ω–æ–≥–æ —É–≥–ª–∞.'
+      PRINT *, '5. –í—ã—Ö–æ–¥.'
       END
 
       SUBROUTINE input(item)
       INTEGER item
       PRINT *, ' '
-      PRINT *, 'ÇÎ°•‡®‚• Ø„≠™‚:'
+      PRINT *, '–í—ã–±–µ—Ä–∏—Ç–µ –ø—É–Ω–∫—Ç:'
       READ *, item
       END
 
@@ -62,53 +62,53 @@ c      IF (a.LT.b+c .AND. b.LT.a+c .AND. c.LT.a+b) THEN
 c      IF (S .NE. 0) THEN
       PRINT *, text, result
 c      ELSE
-c      PRINT *, 'Ñ†≠≠†Ô ‰®£„‡† ≠• ¨Æ¶•‚ °Î‚Ï ‚‡•„£Æ´Ï≠®™Æ¨.'
+c      PRINT *, '–î–∞–Ω–Ω–∞—è —Ñ–∏–≥—É—Ä–∞ –Ω–µ –º–æ–∂–µ—Ç –±—ã—Ç—å —Ç—Ä–µ—É–≥–æ–ª—å–Ω–∏–∫–æ–º.'
 c      END IF
       END
 
-      SUBROUTINE setData() ! Ç¢Æ§ §†≠≠ÎÂ 
+      SUBROUTINE setData() ! –í–≤–æ–¥ –¥–∞–Ω–Ω—ã—Ö 
       COMMON /angles/ alpha, beta, gamma
       COMMON /side/ a, b, c 
       COMMON /shared/ S, pi
-      PRINT *, 'Ç¢•§®‚• §†≠≠Î•:'
-      PRINT *, 'ë‚Æ‡Æ≠† a: '
+      PRINT *, '–í–≤–µ–¥–∏—Ç–µ –¥–∞–Ω–Ω—ã–µ:'
+      PRINT *, '–°—Ç–æ—Ä–æ–Ω–∞ a: '
       READ *, a
-      PRINT *, 'ë‚Æ‡Æ≠† b: '
+      PRINT *, '–°—Ç–æ—Ä–æ–Ω–∞ b: '
       READ *, b
-      PRINT *, 'ì£Æ´ ¨•¶§„ ≠®¨®: '
+      PRINT *, '–£–≥–æ–ª –º–µ–∂–¥—É –Ω–∏–º–∏: '
       READ *, alpha
       END
 
-      SUBROUTINE calculateGamma() ! ÇÎÁ®·´•≠®• „£´Æ¢
+      SUBROUTINE calculateGamma() ! –í—ã—á–∏—Å–ª–µ–Ω–∏–µ —É–≥–ª–æ–≤
       COMMON /angles/ alpha, beta, gamma
       COMMON /side/ a, b, c 
       COMMON /shared/ S, pi
       c = sqrt(a**2+b**2-2*a*b*cos(alpha * pi / 180))
       beta = acos((b**2 + c**2 - a**2)/(2*b*c)) * 180 / pi  
       gamma = 180 - alpha - beta 
-      PRINT *, 'á≠†Á•≠®• Ø•‡•¨•≠≠Æ© a:', a 
-      PRINT *, 'á≠†Á•≠®• Ø•‡•¨•≠≠Æ© b:', b 
-      PRINT *, 'á≠†Á•≠®• Ø•‡•¨•≠≠Æ© ·:', c 
-      PRINT *, 'á≠†Á•≠®• Ø•‡•¨•≠≠Æ© alpha:', alpha
-      PRINT *, 'á≠†Á•≠®• Ø•‡•¨•≠≠Æ© beta:', beta
-      PRINT *, 'á≠†Á•≠®• Ø•‡•¨•≠≠Æ© gamma:', gamma
+      PRINT *, '–ó–Ω–∞—á–µ–Ω–∏–µ –ø–µ—Ä–µ–º–µ–Ω–Ω–æ–π a:', a 
+      PRINT *, '–ó–Ω–∞—á–µ–Ω–∏–µ –ø–µ—Ä–µ–º–µ–Ω–Ω–æ–π b:', b 
+      PRINT *, '–ó–Ω–∞—á–µ–Ω–∏–µ –ø–µ—Ä–µ–º–µ–Ω–Ω–æ–π —Å:', c 
+      PRINT *, '–ó–Ω–∞—á–µ–Ω–∏–µ –ø–µ—Ä–µ–º–µ–Ω–Ω–æ–π alpha:', alpha
+      PRINT *, '–ó–Ω–∞—á–µ–Ω–∏–µ –ø–µ—Ä–µ–º–µ–Ω–Ω–æ–π beta:', beta
+      PRINT *, '–ó–Ω–∞—á–µ–Ω–∏–µ –ø–µ—Ä–µ–º–µ–Ω–Ω–æ–π gamma:', gamma
       END
  
-      SUBROUTINE calculateS() ! ÇÎÁ®·´•≠®• Ø´ÆÈ†§® 
+      SUBROUTINE calculateS() ! –í—ã—á–∏—Å–ª–µ–Ω–∏–µ –ø–ª–æ—â–∞–¥–∏ 
       COMMON /angles/ alpha, beta, gamma
       COMMON /side/ a, b, c 
       COMMON /shared/ S, pi
       S = 0.5 * a * b * sin(alpha * pi / 180)
       END
 
-      REAL FUNCTION minAngle() ! èÆ®·™ ¨®≠®¨†´Ï≠Æ£Æ „£´†
+      REAL FUNCTION minAngle() ! –ü–æ–∏—Å–∫ –º–∏–Ω–∏–º–∞–ª—å–Ω–æ–≥–æ —É–≥–ª–∞
       COMMON /angles/ alpha, beta, gamma
       COMMON /side/ a, b, c 
       COMMON /shared/ S, pi
       minAngle = min(alpha, beta, gamma) 
       END
 
-      REAL FUNCTION minCos() ! èÆ®·™ ¨®≠®¨†´Ï≠Æ£Æ ™Æ·®≠„·†
+      REAL FUNCTION minCos() ! –ü–æ–∏—Å–∫ –º–∏–Ω–∏–º–∞–ª—å–Ω–æ–≥–æ –∫–æ—Å–∏–Ω—É—Å–∞
       COMMON /angles/ alpha, beta, gamma
       COMMON /side/ a, b, c
       COMMON /shared/ S, pi
